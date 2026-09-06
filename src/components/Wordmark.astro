@@ -1,0 +1,32 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  /** true when the wordmark sits over a photograph. */
+  onPhoto?: boolean;
+}
+const { onPhoto = false } = Astro.props;
+---
+
+<a class:list={['wordmark', { 'on-photo': onPhoto }]} href="/">{site.wordmark}</a>
+
+<style>
+  .wordmark {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .on-photo {
+    color: var(--paper);
+  }
+
+  @media (max-width: 768px) {
+    .wordmark {
+      font-size: 14px;
+    }
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+import Wordmark from './Wordmark.astro';
+import Nav from './Nav.astro';
+---
+
+<header class="site-header">
+  <Wordmark />
+  <Nav />
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-h);
+    padding: 0 var(--margin);
+    background: var(--ground);
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+import Base from '../../layouts/Base.astro';
+import SeriesHeader from '../../components/SeriesHeader.astro';
+import FrameView from '../../components/Frame.astro';
+import FramePair from '../../components/FramePair.astro';
+import { allSeries, nextSeriesLine } from '../../data/catalog';
+import type { Frame } from '../../data/catalog';
+
+export function getStaticPaths() {
+  return allSeries.map((s) => ({ params: { series: s.slug }, props: { series: s } }));
+}
+
+const { series } = Astro.props;
+
+// The edit, grouped: a frame marked `pair` sits beside the one after it.
+const groups: Frame[][] = [];
+for (let i = 0; i < series.frames.length; i += 1) {
+  const frame = series.frames[i];
+  const partner = series.frames[i + 1];
+  if (frame.pair && partner) {
+    groups.push([frame, partner]);
+    i += 1;
+  } else {
+    groups.push([frame]);
+  }
+}
+
+const next = nextSeriesLine(series);
+---
+
+<Base title={series.title} ground={series.ground} accent={series.counterColor}>
+  <SeriesHeader series={series} />
+
+  <main id="main" class="series">
+    <div class="sequence">
+      {
+        groups.map((group, i) =>
+          group.length === 2 ? (
+            <FramePair
+              frames={group as [Frame, Frame]}
+              treatment={series.treatment}
+              eager={i === 0}
+            />
+          ) : (
+            <FrameView
+              frame={group[0]}
+              treatment={series.treatment}
+              eager={i === 0}
+            />
+          ),
+        )
+      }
+    </div>
+
+    {
+      next && (
+        <a class="mono next" href={next.href}>
+          {next.text}
+        </a>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .sequence {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Roughly a quarter of the screen of empty paper between frames. */
+    gap: 25vh;
+    padding: 120px var(--margin) 0;
+  }
+
+  .next {
+    display: block;
+    margin-top: 140px;
+    padding: 0 var(--margin) 120px;
+    color: var(--ink-2);
+    transition: color 150ms ease;
+  }
+
+  .next:hover {
+    color: var(--ink);
+  }
+
+  @media (max-width: 768px) {
+    .sequence {
+      gap: 18vh;
+      padding-top: 72px;
+    }
+
+    .next {
+      margin-top: 96px;
+      padding-bottom: 80px;
+    }
+  }
+</style>
+
+<script>
+  function startCounter() {
+    const counter = document.querySelector<HTMLElement>('[data-counter]');
+    const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
+    if (!counter || frames.length === 0) return;
+
+    const total = counter.dataset.total ?? String(frames.length);
+    const pad = (n: string) => n.padStart(3, '0');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = (entry.target as HTMLElement).dataset.index;
+          if (index) counter.textContent = `${pad(index)} / ${total}`;
+        }
+      },
+      // Fires as a photograph crosses the vertical centre of the viewport.
+      { rootMargin: '-50% 0px -50% 0px' },
+    );
+
+    frames.forEach((frame) => observer.observe(frame));
+    document.addEventListener('astro:before-swap', () => observer.disconnect(), {
+      once: true,
+    });
+  }
+
+  document.addEventListener('astro:page-load', startCounter);
+</script>

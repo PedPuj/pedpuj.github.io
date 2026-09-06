@@ -1,0 +1,268 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { allFrames, getSeries, counterText } from '../../data/catalog';
+
+export function getStaticPaths() {
+  return allFrames.map((frame) => ({ params: { id: frame.id }, props: { frame } }));
+}
+
+const { frame } = Astro.props;
+const series = getSeries(frame.collection);
+
+// Loose frames have no series, so they borrow the lightbox metadata grey.
+const accent = series ? series.counterColor : '#8C877E';
+const total = series ? series.frameCount : allFrames.filter((f) => f.collection === 'loose').length;
+const backHref = series ? series.href : '/loose/';
+const prevHref = frame.prev ? `/frame/${frame.prev}/` : null;
+const nextHref = frame.next ? `/frame/${frame.next}/` : null;
+const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`;
+---
+
+<Base title={title} ground="#141210" accent={accent}>
+  <main
+    id="main"
+    class="lightbox"
+    data-lightbox
+    data-prev={prevHref}
+    data-next={nextHref}
+    data-back={backHref}
+  >
+    <div class="stage">
+      {
+        frame.image ? (
+          <Image
+            src={frame.image}
+            alt={frame.slot}
+            widths={[800, 1400, 2000]}
+            sizes="88vh"
+            loading="eager"
+            data-fade
+            transition:name={frame.id}
+          />
+        ) : (
+          <span class="slot" transition:name={frame.id} />
+        )
+      }
+    </div>
+
+    <div class="chrome" data-chrome>
+      <span class="mono counter">{counterText(frame.index, total)}</span>
+      <a class="close" href={backHref} aria-label="Close">✕</a>
+
+      {prevHref && (
+        <a class="arrow prev" href={prevHref} aria-label="Previous frame">‹</a>
+      )}
+      {nextHref && (
+        <a class="arrow next" href={nextHref} aria-label="Next frame">›</a>
+      )}
+
+      <p class="mono meta">{frame.metadata}</p>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .lightbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    min-height: 100vh;
+    min-height: 100svh;
+    background: var(--lightbox);
+    overflow: hidden;
+  }
+
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage :global(img) {
+    max-height: 88vh;
+    max-width: calc(100vw - var(--margin) * 2);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+
+  .stage :global(img.is-loaded) {
+    opacity: 1;
+  }
+
+  .slot {
+    display: block;
+    width: min(calc(100vw - var(--margin) * 2), 132vh);
+    aspect-ratio: 3 / 2;
+    background: #201d1a;
+  }
+
+  .chrome {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 300ms ease;
+  }
+
+  .chrome a {
+    pointer-events: auto;
+  }
+
+  .chrome.is-idle {
+    opacity: 0;
+  }
+
+  .counter {
+    position: absolute;
+    top: 28px;
+    right: 76px;
+    font-size: 12px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .close {
+    position: absolute;
+    top: 26px;
+    right: 32px;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--lightbox-meta);
+    transition: color 150ms ease;
+  }
+
+  .close:hover {
+    color: var(--paper);
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+    line-height: 1;
+    /* Deliberately low contrast. */
+    color: rgba(245, 242, 236, 0.28);
+    transition: color 150ms ease;
+  }
+
+  .arrow:hover {
+    color: rgba(245, 242, 236, 0.6);
+  }
+
+  .prev {
+    left: 28px;
+  }
+
+  .next {
+    right: 28px;
+  }
+
+  .meta {
+    position: absolute;
+    bottom: 34px;
+    left: var(--margin);
+    color: var(--lightbox-meta);
+  }
+
+  @media (max-width: 768px) {
+    .arrow {
+      display: none;
+    }
+
+    .stage :global(img) {
+      max-height: 74svh;
+    }
+
+    .counter {
+      top: 24px;
+      right: 60px;
+      font-size: 11px;
+    }
+
+    .close {
+      top: 22px;
+      right: 20px;
+    }
+
+    .meta {
+      bottom: 26px;
+      right: var(--margin);
+    }
+  }
+</style>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  function setupLightbox() {
+    const root = document.querySelector<HTMLElement>('[data-lightbox]');
+    if (!root) return;
+
+    const chrome = root.querySelector<HTMLElement>('[data-chrome]');
+    const prev = root.dataset.prev || null;
+    const next = root.dataset.next || null;
+    const back = root.dataset.back || '/';
+
+    let timer: number | undefined;
+
+    // Chrome fades away after three seconds of stillness.
+    function wake() {
+      chrome?.classList.remove('is-idle');
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => chrome?.classList.add('is-idle'), 3000);
+    }
+
+    function onKey(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === 'Escape') navigate(back);
+      else if (event.key === 'ArrowLeft' && prev) navigate(prev);
+      else if (event.key === 'ArrowRight' && next) navigate(next);
+    }
+
+    // Swipe: left/right between frames, down to close.
+    let startX = 0;
+    let startY = 0;
+
+    function onTouchStart(event: TouchEvent) {
+      startX = event.changedTouches[0].clientX;
+      startY = event.changedTouches[0].clientY;
+    }
+
+    function onTouchEnd(event: TouchEvent) {
+      const dx = event.changedTouches[0].clientX - startX;
+      const dy = event.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0 && next) navigate(next);
+        else if (dx > 0 && prev) navigate(prev);
+      } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+        navigate(back);
+      }
+    }
+
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousemove', wake);
+    root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        window.clearTimeout(timer);
+        document.removeEventListener('keydown', onKey);
+        document.removeEventListener('mousemove', wake);
+      },
+      { once: true },
+    );
+
+    wake();
+  }
+
+  document.addEventListener('astro:page-load', setupLightbox);
+</script>

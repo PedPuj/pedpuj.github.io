@@ -1,0 +1,85 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  /** Page title, placed before the wordmark. Omit on the homepage. */
+  title?: string;
+  description?: string;
+  /** Page ground colour. Japan series pages use the cooler near-white. */
+  ground?: string;
+  /** Series accent. null = no accent hue; falls back to ink. */
+  accent?: string | null;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  ground = '#F5F2EC',
+  accent = null,
+  bodyClass = '',
+} = Astro.props;
+
+const fullTitle = title ? `${title} — ${site.wordmark}` : site.wordmark;
+const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
+---
+
+<html lang="en" style={vars}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=switzer@400,500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&display=swap"
+    />
+
+    <ClientRouter />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>
+
+<script>
+  // Every photograph fades in over 400ms once it is actually decoded.
+  // No spinner, no skeleton: the flat block behind it is the loading state.
+  function fadeIn(img: HTMLImageElement) {
+    if (img.dataset.faded === 'true') return;
+    img.dataset.faded = 'true';
+    if (img.complete && img.naturalWidth > 0) {
+      img.style.transition = 'none';
+      img.classList.add('is-loaded');
+      void img.offsetWidth;
+      img.style.transition = '';
+      return;
+    }
+    img.addEventListener('load', () => img.classList.add('is-loaded'), { once: true });
+    img.addEventListener('error', () => img.classList.add('is-loaded'), { once: true });
+  }
+
+  function run() {
+    document.querySelectorAll<HTMLImageElement>('img[data-fade]').forEach(fadeIn);
+  }
+
+  run();
+  document.addEventListener('astro:page-load', run);
+</script>

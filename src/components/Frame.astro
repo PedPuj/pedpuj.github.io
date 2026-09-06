@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+import type { Frame } from '../data/catalog';
+
+interface Props {
+  frame: Frame;
+  /** 'mount' = 32px white mount + 1px hairline (Workers only). */
+  treatment?: 'bare' | 'mount';
+  eager?: boolean;
+  /** Cap on the photograph's height. 78vh on series pages. */
+  maxHeight?: string;
+  /** Let a parent (a pair) decide the width instead of the height cap. */
+  fill?: boolean;
+  /** Wrap the photograph in a link to its full-screen view. */
+  link?: boolean;
+  /** Give the image a view-transition name, for the morph into /frame/. */
+  morph?: boolean;
+  class?: string;
+  style?: string;
+}
+
+const {
+  frame,
+  treatment = 'bare',
+  eager = false,
+  maxHeight = '78vh',
+  fill = false,
+  link = true,
+  morph = true,
+  class: className = '',
+  style: extraStyle = '',
+} = Astro.props;
+
+// The real proportions where the file exists; the declared orientation until then.
+const ratio = frame.image
+  ? frame.image.width / frame.image.height
+  : frame.orientation === 'v'
+    ? 2 / 3
+    : 3 / 2;
+
+// A mount adds 32px of card either side plus its hairline.
+const chrome = treatment === 'mount' ? 66 : 0;
+
+const style = [
+  `--ar: ${ratio}`,
+  `--max-h: ${maxHeight}`,
+  `--chrome: ${chrome}px`,
+]
+  .concat(extraStyle ? [extraStyle] : [])
+  .join('; ');
+
+const Tag = link ? 'a' : 'div';
+const attrs = link ? { href: frame.href } : {};
+---
+
+<figure
+  class:list={['frame', treatment, { fill }, className]}
+  style={style}
+  data-frame
+  data-index={frame.index}
+>
+  <Tag class="target" {...attrs}>
+    <span class="mat">
+      {
+        frame.image ? (
+          <Image
+            src={frame.image}
+            alt={frame.slot}
+            widths={[600, 1000, 1600, 2200]}
+            sizes="(max-width: 768px) 100vw, 78vw"
+            loading={eager ? 'eager' : 'lazy'}
+            decoding={eager ? 'sync' : 'async'}
+            data-fade
+            {...(morph ? { 'transition:name': frame.id } : {})}
+          />
+        ) : (
+          <span class="slot">
+            {import.meta.env.DEV && <span class="mono slot-note">
+              {frame.slot}
+              <br />
+              missing: src/images/{frame.collection}/{frame.file}
+            </span>}
+          </span>
+        )
+      }
+    </span>
+  </Tag>
+</figure>
+
+<style>
+  .frame {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Width is derived from the height cap, so the photograph is never
+     taller than --max-h and never wider than the paper allows. */
+  .target {
+    display: block;
+    width: min(100%, calc(var(--max-h) * var(--ar) + var(--chrome)));
+  }
+
+  .fill .target {
+    width: 100%;
+  }
+
+  .mat {
+    display: block;
+    width: 100%;
+  }
+
+  /* Workers: a 32px white mount with a hairline, as in a photobook. */
+  .mount .mat {
+    padding: 32px;
+    background: var(--mount);
+    border: 1px solid var(--hairline);
+  }
+
+  /* width is definite, so the width/height attributes reserve the right
+     box before the file arrives: the flat block never reflows. */
+  .frame :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--block);
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+
+  .frame :global(img.is-loaded) {
+    opacity: 1;
+  }
+
+  /* No file on disk yet: a flat block at the right shape. */
+  .slot {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    aspect-ratio: var(--ar);
+    background: var(--block);
+  }
+
+  .slot-note {
+    padding: 12px 14px;
+    color: var(--ink-2);
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 768px) {
+    .mount .mat {
+      padding: 16px;
+    }
+  }
+</style>

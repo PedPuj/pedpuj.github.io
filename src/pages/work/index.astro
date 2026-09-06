@@ -1,0 +1,161 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import { allSeries } from '../../data/catalog';
+import { series as seriesInput } from '../../data/frames';
+
+const notes = new Map(seriesInput.map((s) => [s.slug, s.note]));
+---
+
+<Base title="Work" ground="#F5F2EC">
+  <SiteHeader />
+
+  <main id="main" class="index">
+    {
+      allSeries.map((s) => (
+        <a
+          class="row"
+          href={s.href}
+          style={`--row-accent: ${s.counterColor}`}
+          data-astro-prefetch="hover"
+        >
+          <div class="cover">
+            {s.cover.image ? (
+              <Image
+                src={s.cover.image}
+                alt={s.cover.slot}
+                widths={[700, 1000, 1400]}
+                sizes="(max-width: 768px) 100vw, 52vw"
+                loading="eager"
+              />
+            ) : (
+              <span class="cover-slot">
+                {import.meta.env.DEV && <span class="mono slot-note">{s.cover.slot}</span>}
+              </span>
+            )}
+          </div>
+
+          <div class="meta">
+            <h2 class="title">{s.title}</h2>
+            <span class="rule" aria-hidden="true" />
+            <div class="lines">
+              <p class="mono">{s.monoLine}</p>
+              {notes.get(s.slug) && <p class="mono">{notes.get(s.slug)}</p>}
+            </div>
+          </div>
+        </a>
+      ))
+    }
+  </main>
+</Base>
+
+<style>
+  .index {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--gutter);
+    align-items: center;
+    height: 540px;
+    padding: 0 var(--margin);
+    border-top: 1px solid var(--hairline);
+  }
+
+  .cover {
+    grid-column: span 7;
+    height: 392px;
+    background: var(--block);
+    overflow: hidden;
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 250ms ease;
+  }
+
+  .cover-slot {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+    background: var(--block);
+  }
+
+  .slot-note {
+    padding: 12px 14px;
+    color: var(--ink-2);
+    font-size: 10px;
+  }
+
+  .meta {
+    grid-column: 9 / span 4;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  /* Draws left to right on hover. */
+  .rule {
+    display: block;
+    width: 0;
+    height: 1px;
+    background: var(--row-accent);
+    transition: width 250ms ease;
+  }
+
+  .lines {
+    color: var(--ink-2);
+  }
+
+  .row:hover .cover :global(img),
+  .row:focus-visible .cover :global(img) {
+    filter: brightness(1.04);
+  }
+
+  .row:hover .rule,
+  .row:focus-visible .rule {
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .row {
+      display: block;
+      height: auto;
+      padding: 32px var(--margin) 40px;
+    }
+
+    .cover {
+      height: 233px;
+      margin-bottom: 16px;
+    }
+
+    .meta {
+      gap: 16px;
+    }
+
+    .title {
+      font-size: 26px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row:hover .cover :global(img) {
+      filter: none;
+    }
+  }
+</style>

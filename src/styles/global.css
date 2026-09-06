@@ -1,0 +1,160 @@
+/* ─────────────────────────────────────────────────────────────
+   Design tokens and the handful of rules that are genuinely
+   global. Everything else lives scoped inside its component.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* Colour */
+  --paper: #f5f2ec;
+  --paper-japan: #fbfaf7;
+  --ink: #1a1815;
+  --ink-2: #6b655c;
+  --hairline: #ddd8ce;
+  --mount: #ffffff;
+  --block: #eae6de;
+  --lightbox: #141210;
+  --lightbox-meta: #8c877e;
+
+  /* Set per page by the layout. */
+  --ground: var(--paper);
+  --accent: var(--ink);
+
+  /* Grid and spacing */
+  --margin: 64px;
+  --gutter: 24px;
+  --header-h: 96px;
+  --series-header-h: 72px;
+
+  /* Type */
+  --sans: 'Switzer', ui-sans-serif, -apple-system, 'Helvetica Neue', Arial,
+    sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  color-scheme: light;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --margin: 20px;
+    --header-h: 72px;
+    --series-header-h: 64px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  background: var(--ground);
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* No bold weights anywhere on this site. */
+strong,
+b,
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* All text is left-aligned. Nothing is centred, nothing justified. */
+.mono {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .mono {
+    font-size: 10px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--gutter);
+}
+
+/* Skip link — visible only when focused. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 8px 16px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.skip:focus {
+  left: 0;
+}
+
+:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* The paper ground cross-dissolves to the lightbox over 300ms, and back.
+   Frame-to-frame in the lightbox uses the same dissolve — never a slide. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

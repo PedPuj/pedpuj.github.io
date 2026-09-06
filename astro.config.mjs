@@ -14,4 +14,8 @@ export default defineConfig({
   //  address rather than in a subfolder.
   // ─────────────────────────────────────────────────────────────
   site: 'https://pedpuj.github.io',
+
+  // Warms the next page on hover, so hovering a series row on /work
+  // has its first frames ready by the time the click lands.
+  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
 });

@@ -1,0 +1,70 @@
+---
+import FrameView from './Frame.astro';
+import type { Frame } from '../data/catalog';
+
+interface Props {
+  frames: [Frame, Frame];
+  treatment?: 'bare' | 'mount';
+  eager?: boolean;
+}
+const { frames, treatment = 'bare', eager = false } = Astro.props;
+
+const ratioOf = (frame: Frame) =>
+  frame.image
+    ? frame.image.width / frame.image.height
+    : frame.orientation === 'v'
+      ? 2 / 3
+      : 3 / 2;
+
+const ratios = frames.map(ratioOf);
+const sum = ratios[0] + ratios[1];
+
+// Widths in proportion to the aspect ratios, so the two photographs are
+// always exactly the same height. The cap keeps that height at 56vh.
+const chrome = treatment === 'mount' ? 66 * 2 : 0;
+const maxWidth = `calc(${sum} * 56vh + var(--gutter) + ${chrome}px)`;
+---
+
+<div class="pair" style={`--pair-max: ${maxWidth}`}>
+  {
+    frames.map((frame, i) => (
+      <FrameView
+        frame={frame}
+        treatment={treatment}
+        eager={eager}
+        fill
+        class="pair-item"
+        style={`--flex: ${ratios[i]}`}
+      />
+    ))
+  }
+</div>
+
+<style>
+  /* Two photographs side by side, matched in height, to break the rhythm. */
+  @media (min-width: 769px) {
+    .pair {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gutter);
+      width: min(100%, var(--pair-max));
+      margin: 0 auto;
+    }
+
+    .pair :global(.pair-item) {
+      flex: var(--flex) 1 0;
+      min-width: 0;
+    }
+  }
+
+  /* On mobile the pair dissolves: one photograph per screen, as elsewhere. */
+  @media (max-width: 768px) {
+    .pair {
+      display: contents;
+    }
+
+    .pair :global(.pair-item) {
+      width: 100%;
+    }
+  }
+</style>

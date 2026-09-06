@@ -12,9 +12,8 @@ browser gets click-by-click instructions).
 
 Live at **https://pedpuj.github.io/**
 
-This session was **setup only**. The portfolio itself — gallery, layout,
-typography, actual photos — was deliberately left for a later session. The
-homepage is a throwaway placeholder.
+Session 1 was **setup only** (below). Session 2 built the design — see the
+second half of this file.
 
 ---
 
@@ -130,9 +129,174 @@ Worth aligning at some point, but not urgent.
 
 ## Deliberately not done
 
-Left for the next session, by instruction: gallery, layout, styling, photo
-pages, sample images, any design decision at all. `src/pages/index.astro` is a
-placeholder and is meant to be replaced wholesale.
+Not set up: analytics, sitemap, RSS, image licensing or watermarking, a contact
+form. (No contact form is a design decision, not an omission — the handoff
+forbids one.)
 
-Also not set up: analytics, sitemap, RSS, SEO metadata, image licensing or
-watermarking, a contact form.
+
+---
+
+# Session 2 — the design, built
+
+**6 September 2026.** Built the six screens from the *Bedro design system
+canvas* handoff (`Bedro.dc.html` + `README.md`, produced in Claude Design).
+The handoff is high-fidelity and prescriptive: colours, type, spacing,
+transition durations and interaction states were all specified exactly, and it
+states that where the prototype and its README disagree, the README wins. Built
+to the README.
+
+The placeholder homepage from session 1 was replaced wholesale, as planned.
+
+## What got built
+
+Six routes: `/`, `/work`, `/work/[series]`, `/loose`, `/frame/[id]`, `/about`.
+54 pages at build time.
+
+Design tokens live as CSS custom properties on `:root` in
+`src/styles/global.css`; ground colour and series accent are set per page as
+inline custom properties on `<html>` by `Base.astro`, which is what lets the
+Japan pages shift ground to `#FBFAF7` and drain the accent hue to `#8C877E`
+without a second stylesheet.
+
+## Decisions and why
+
+### Plain TypeScript data, not content collections
+
+The handoff suggests Astro content collections (`src/content/series/*.md` plus a
+frames file). Used a single hand-authored `src/data/frames.ts` instead, with
+`src/data/catalog.ts` deriving ids, neighbours, metadata strings and resolved
+images from it.
+
+Reason: **the person maintaining this file does not write code.** Three series
+and one loose dump do not need a validated collection API; they need one list
+that reads top-to-bottom in the order the photographs appear, with a comment
+block explaining each field. Splitting it across markdown frontmatter and a
+separate frames file would have meant editing two files to add one photograph.
+
+The handoff's real requirement — "series ordering is the *edit*, it is authored,
+never sorted" — is honoured either way. Nothing is sorted at any point.
+
+Frame counts (`24 FRAMES` etc. in the handoff) are **derived from the list
+length**, not hard-coded, so the site can never claim a frame count it doesn't
+have. Until real photographs are added, the counts read 10 / 12 / 10.
+
+### Images: missing files are a designed state, not an error
+
+Every photograph is resolved through `import.meta.glob` over `src/images/`. If
+the file named in `frames.ts` isn't on disk, the frame renders as the flat
+`#EAE6DE` block from the handoff's loading-state spec, at the correct aspect
+ratio, reserving exactly the space the photograph will take. In `astro dev` only,
+it also prints the slot description and the missing path.
+
+This means the whole sequence can be laid out before a single file exists, and
+adding a photograph never reflows the page.
+
+### Sizing: width is derived from the height cap, not the other way round
+
+The handoff's rule is a single **78vh maximum height** so horizontals and
+verticals read as equal objects. The obvious CSS for that —
+`max-height: 78vh; width: auto; height: auto` — is a **trap**: author `width`
+and `height` declarations override the presentational hints that Astro's
+`<Image />` width/height attributes provide, so an unloaded image measures 0×0
+and the whole page reflows as photographs arrive. This was hit and fixed during
+the build.
+
+Instead each frame's wrapper is sized
+`width: min(100%, calc(var(--max-h) * <aspect ratio> + <mount chrome>))` with the
+image at `width: 100%; height: auto`. The ratio is read from the real file at
+build time (falling back to the declared orientation when there is no file yet).
+Definite width plus the intrinsic ratio means the box is correct before the
+bytes arrive.
+
+Side-by-side pairs use the same idea: `flex: <aspect ratio>` on each item and a
+container capped at `calc((r1 + r2) * 56vh + gutter)`. Widths in proportion to
+the ratios means the two photographs are **always exactly the same height**,
+which is what the handoff asks for and what a fixed height per image cannot
+guarantee. On mobile the pair container becomes `display: contents`, so the two
+frames drop into the parent stack as ordinary siblings and inherit its spacing —
+one photograph per screen, as specified, with no duplicate markup.
+
+### Interactions: three small scripts, no framework
+
+`client:*` directives need a UI framework; plain `<script>` tags do not, and
+nothing here needs one.
+
+1. **Frame counter** — IntersectionObserver at `rootMargin: -50% 0px -50% 0px`,
+   so the count changes as a photograph crosses the vertical centre.
+2. **Nav underline** — measured from the active link's `offsetLeft`/`offsetWidth`
+   and re-measured on `document.fonts.ready` (the handoff warns that a font swap
+   after paint would visibly shift it) and on resize. The nav carries
+   `transition:persist`, so the underline is the *same DOM node* across a
+   navigation and genuinely slides between items over 200ms rather than fading.
+   Two persist keys (`nav-paper`, `nav-photo`) keep the homepage's white-on-photo
+   nav from persisting onto a paper page.
+   Because the node persists, the active item is recomputed from
+   `location.pathname` rather than read from markup — the markup would be stale.
+3. **Lightbox** — keyboard (←/→/Escape), swipe (left/right between frames, down
+   to close) and the 3-second idle fade. Navigation goes through Astro's
+   `navigate()` so each frame stays a real, shareable URL with correct
+   back-button behaviour.
+
+The paper→`#141210` cross-dissolve and the thumbnail→frame morph are view
+transitions, not hand-written animation: `transition:name={frame.id}` on both the
+Loose thumbnail and the lightbox image.
+
+**One knowing deviation:** the handoff asks for 300ms on lightbox open/close and
+250ms on frame-to-frame. Both are the same root cross-dissolve, and the duration
+is set once in CSS, so both are **300ms**. Splitting them would have meant
+hand-rolling what the view-transition API does for free. It is a cross-dissolve,
+never a slide, which is the part that matters.
+
+### Series photographs link to the full-screen view
+
+The handoff only says the Loose thumbnails open `/frame/[id]`, but it also
+specifies that the lightbox counter uses the *series* accent — so series frames
+have to be reachable. Made the photographs themselves the link. This adds no
+visible UI: no caption, no icon, no hover effect on the image, nothing over the
+photograph. The series page still reads as a sequence and nothing else.
+
+### Fonts from the CDN, not self-hosted (yet)
+
+The handoff says self-host Switzer and IBM Plex Mono as woff2 in `public/fonts`.
+They are currently loaded from Fontshare and Google Fonts with `preconnect` and
+`display=swap`.
+
+The stated reason for self-hosting was that a font swap after paint would shift
+the measured nav underline — that is solved directly instead, by re-measuring on
+`document.fonts.ready`. Self-hosting remains worth doing (privacy, one less
+third party, no flash of fallback) and needs downloading four woff2 files into
+`public/fonts` and swapping the two `<link>` tags in `Base.astro` for
+`@font-face` rules. Not done because downloading assets wasn't authorised in
+this session.
+
+### Series accent vs. Japan
+
+The series data carries both `accent` (null for Japan) and `counterColor`.
+Components use `counterColor` — for Workers and China it is the accent, for Japan
+it is `#8C877E`. That is the handoff's "colour drains out of the interface"
+rule expressed once, in data, rather than as a conditional in every component.
+
+The token table says the accent is used for the series title on its own page;
+the screen spec for that same title says `#1A1815`. Followed the screen spec,
+which is the more specific of the two.
+
+## Verified in the browser
+
+Ground colours, counter colours per series, 25vh frame separation, 120px above
+the first frame, 140px before the next-series line, the 5-column loose grid, the
+About grid, lightbox chrome and metadata, mobile at 375px, the sliding underline
+across a real navigation, keyboard navigation and the idle fade.
+
+Verification used generated placeholder images so the layout could be measured
+with real intrinsic dimensions. **Those were deleted afterwards** — no fake
+photographs are committed. `src/images/*/.gitkeep` keeps the six folders in git.
+
+## Still open
+
+- Real photographs. Every frame is a grey block until then.
+- `hello@bedro.com` and the Instagram link in `src/data/site.ts` are the
+  handoff's placeholders and are almost certainly wrong.
+- Self-hosting the fonts (above).
+- The frame counts in the handoff (24 / 38 / 31) describe a bigger edit than the
+  10 / 12 / 10 currently listed. Add lines to `frames.ts` as photographs arrive;
+  the counts follow automatically.

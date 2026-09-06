@@ -1,0 +1,59 @@
+---
+import Wordmark from './Wordmark.astro';
+import type { Series } from '../data/catalog';
+import { counterText } from '../data/catalog';
+
+interface Props {
+  series: Series;
+}
+const { series } = Astro.props;
+const start = counterText(1, series.frameCount);
+---
+
+<header class="series-header">
+  <Wordmark />
+  <span class="series-title">{series.title}</span>
+  <span class="counter mono" data-counter data-total={series.frameCount}>{start}</span>
+</header>
+
+<style>
+  .series-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    height: var(--series-header-h);
+    padding: 0 var(--margin);
+    /* Translucent paper. No border, no shadow, no solid bar. */
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    -webkit-backdrop-filter: none;
+  }
+
+  .series-title {
+    margin-left: 120px;
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .counter {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    transition: color 200ms ease;
+  }
+
+  /* Mobile header is wordmark and counter only. */
+  @media (max-width: 768px) {
+    .series-title {
+      display: none;
+    }
+    .counter {
+      font-size: 11px;
+    }
+  }
+</style>

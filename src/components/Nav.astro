@@ -1,0 +1,121 @@
+---
+interface Props {
+  /** true when the nav sits over a photograph (homepage only). */
+  onPhoto?: boolean;
+}
+const { onPhoto = false } = Astro.props;
+
+const items = [
+  { label: 'Work', href: '/work/' },
+  { label: 'Loose', href: '/loose/' },
+  { label: 'About', href: '/about/' },
+];
+---
+
+<nav
+  class:list={['nav', { 'on-photo': onPhoto }]}
+  data-nav
+  transition:persist={onPhoto ? 'nav-photo' : 'nav-paper'}
+>
+  {items.map((item) => <a href={item.href}>{item.label}</a>)}
+  {!onPhoto && <span class="underline" data-underline aria-hidden="true"></span>}
+</nav>
+
+<style>
+  .nav {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 30px;
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .nav a {
+    color: var(--ink-2);
+    transition: color 150ms ease;
+  }
+
+  .nav a:hover,
+  .nav a[data-active] {
+    color: var(--ink);
+  }
+
+  /* Homepage: every item at full paper colour, no active state. */
+  .on-photo a,
+  .on-photo a:hover {
+    color: var(--paper);
+  }
+
+  .underline {
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    opacity: 0;
+    background: var(--accent);
+    transition:
+      left 200ms ease,
+      width 200ms ease,
+      opacity 200ms ease,
+      background-color 200ms ease;
+  }
+
+  @media (max-width: 768px) {
+    .nav {
+      gap: 18px;
+    }
+  }
+</style>
+
+<script>
+  function paint(nav: HTMLElement) {
+    const bar = nav.querySelector<HTMLElement>('[data-underline]');
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a'));
+    const path = location.pathname;
+
+    let active: HTMLAnchorElement | null = null;
+    for (const link of links) {
+      const base = new URL(link.href).pathname.replace(/\/$/, '');
+      const on = base !== '' && path.startsWith(base);
+      link.toggleAttribute('data-active', on);
+      if (on) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+      if (on) active = link;
+    }
+
+    if (!bar) return;
+
+    // Never animate the very first placement — only later moves slide.
+    const first = nav.dataset.painted !== 'true';
+    if (first) bar.style.transition = 'none';
+
+    if (active) {
+      bar.style.left = `${active.offsetLeft}px`;
+      bar.style.width = `${active.offsetWidth}px`;
+      bar.style.opacity = '1';
+    } else {
+      bar.style.width = '0px';
+      bar.style.opacity = '0';
+    }
+
+    if (first) {
+      void bar.offsetWidth; // flush, so the reset below doesn't animate
+      bar.style.transition = '';
+      nav.dataset.painted = 'true';
+    }
+  }
+
+  function paintAll() {
+    document.querySelectorAll<HTMLElement>('[data-nav]').forEach(paint);
+  }
+
+  document.addEventListener('astro:page-load', paintAll);
+  window.addEventListener('resize', paintAll);
+  // The underline is measured from text width, so re-measure once the
+  // real typeface has replaced the fallback.
+  if (document.fonts) document.fonts.ready.then(paintAll);
+</script>

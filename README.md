@@ -62,19 +62,69 @@ broke (nothing is lost; the previous version stays up).
 
 ---
 
-## How to add a photo later
+## The site, in one picture
 
-The gallery hasn't been built yet — that's the next session. But the place
-photos go is already set up:
+Six kinds of page:
 
-1. Put the image file into **`src/images/`**.
-2. Use a plain, descriptive filename: `iceland-black-beach.jpg`, not
-   `DSC_0042.jpg`. Lowercase, dashes instead of spaces, no accents.
-3. Export at full quality and a generous size (2500px on the long edge is
-   plenty). **Do not shrink or compress it yourself** — the site does that
-   automatically, and it does it better. It creates several smaller versions
-   and hands each visitor the right one for their screen.
-4. Publish it using the three lines above.
+| Address | What it is |
+|---|---|
+| `/` | One photograph, full screen. Nothing else. |
+| `/work` | The three series, one under the other. |
+| `/work/workers`, `/work/china`, `/work/japan` | A series, read one frame at a time, top to bottom. |
+| `/loose` | The contact sheet — everything that didn't make a series. |
+| `/frame/china-004` | One photograph full screen on black, with its film and camera details. Arrow keys move between frames, Escape closes. |
+| `/about` | You, your kit, and two links. |
+
+---
+
+## How to add photos
+
+There are two steps: **put the file somewhere**, and **add a line to the list**.
+
+### Step 1 — put the file in the right folder
+
+| Folder | What goes in it |
+|---|---|
+| `src/images/home/` | `hero.jpg` — the single homepage photograph |
+| `src/images/workers/` | The Workers series, plus `cover.jpg` for the `/work` page |
+| `src/images/china/` | The China series, plus `cover.jpg` |
+| `src/images/japan/` | The Japan series, plus `cover.jpg` |
+| `src/images/loose/` | Everything loose |
+| `src/images/about/` | `portrait.jpg` — the photo of you |
+
+Export at full quality, 2500px on the long edge is plenty. **Do not shrink or
+compress them yourself** — the site does that automatically and does it better.
+Use plain filenames: lowercase, dashes instead of spaces, no accents.
+
+### Step 2 — add a line to the edit
+
+Open **`src/data/frames.ts`**. It is a list, and **the order of the list is the
+order the photographs appear on the site.** Nothing is sorted for you — you
+decide, the way you'd decide the order of prints on a table.
+
+Each photograph is one line that looks like this:
+
+```
+{ file: 'china-01.jpg', slot: 'Market stall, Xian', orientation: 'h', film: 'KODAK PORTRA 400', place: "XI'AN", year: 2026 },
+```
+
+| The bit | What it means |
+|---|---|
+| `file` | The filename, exactly as it is on disk |
+| `slot` | A note to yourself. Also what a blind visitor's screen reader says. |
+| `orientation` | `'h'` if it's landscape, `'v'` if it's portrait |
+| `film`, `place`, `year` | Printed under the photograph in the full-screen view |
+| `pair: true` | Add this and the photograph sits **side by side** with the next one in the list. Use it sparingly — it's there to break the rhythm. |
+
+Copy an existing line, change the words between the quote marks, keep the
+commas and brackets exactly where they are. That's the whole job.
+
+**Until a file exists, its place on the site shows as a flat grey block** with a
+note telling you which file is missing. That is deliberate — you can lay out the
+whole sequence first and fill it in later.
+
+Your name, email, Instagram, camera and film list live in **`src/data/site.ts`**.
+Same idea: change the words between the quote marks, nothing else.
 
 ---
 
@@ -82,12 +132,11 @@ photos go is already set up:
 
 | Folder | What goes in it |
 |---|---|
-| `src/images/` | **Your photos.** Automatically resized and optimised. This is where almost everything goes. |
-| `src/content/` | **Words.** Descriptions of a series, an about page, captions — written as plain text files. |
-| `src/pages/` | **The pages themselves.** One file here becomes one page on the site. `index.astro` is the homepage. |
-| `src/layouts/` | Page templates — the shared frame around every page. |
-| `src/components/` | Reusable pieces, e.g. a gallery grid used on several pages. |
-| `public/` | Files published exactly as-is, untouched: the favicon, a PDF, a CV. **Not for photos** — images here skip the optimisation. |
+| `src/images/` | **Your photos**, in the six folders above. Automatically resized and optimised. |
+| `src/data/` | **The two files you edit**: `frames.ts` (the sequence) and `site.ts` (your details). |
+| `src/pages/` | The pages themselves. One file here becomes one page. |
+| `src/layouts/`, `src/components/`, `src/styles/` | The machinery of the design. Leave these alone unless you want to change how the site looks. |
+| `public/` | Files published exactly as-is: the favicon, a PDF, a CV. **Not for photos** — images here skip the optimisation. |
 
 Folders you can ignore completely: `node_modules` (the machinery, thousands of
 files, never edit), `dist` (the built site, thrown away and rebuilt each time),
