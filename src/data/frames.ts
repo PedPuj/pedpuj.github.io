@@ -14,7 +14,8 @@
 //    slot        a note to yourself; shown as a grey block
 //                until the file actually exists
 //    orientation 'h' for landscape, 'v' for portrait
-//    film        the stock you shot it on
+//    gear        camera and lens, if it wasn't the one in site.ts
+//    film        the stock you shot it on (leave out for digital)
 //    place       where it was taken
 //    year        when
 //    pair        true = this photo sits SIDE BY SIDE with the
@@ -27,6 +28,9 @@ export interface FrameInput {
   file: string;
   slot: string;
   orientation: Orientation;
+  /** Camera and lens. Leave out and it uses the one in site.ts. */
+  gear?: string;
+  /** Film stock. Leave out for digital frames. */
   film?: string;
   place?: string;
   year?: number;
@@ -81,27 +85,61 @@ export const series: SeriesInput[] = [
   {
     slug: 'china',
     title: 'China',
-    places: "BEIJING, XI'AN, SHANGHAI, GUILIN",
+    places: "BEIJING, XI'AN, GUILIN, HANGZHOU, SHANGHAI",
     year: 2026,
     accent: '#9E2B25',
     ground: '#F5F2EC',
     counterColor: '#9E2B25',
     treatment: 'bare',
-    cover: { file: 'cover.jpg', slot: 'China cover — street scene, wide horizontal, colour' },
+    cover: { file: 'dscf2433.jpg', slot: 'Forbidden City roofs above the red wall' },
     next: 'japan',
     frames: [
-      { file: 'china-01.jpg', slot: 'Market stall, Xi’an — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: "XI'AN", year: 2026 },
-      { file: 'china-02.jpg', slot: 'Shopfront at dusk — horizontal', orientation: 'h', film: 'LUCKY 200', place: 'SHANGHAI', year: 2026, pair: true },
-      { file: 'china-03.jpg', slot: 'Man on a bench, narrow — vertical', orientation: 'v', film: 'LUCKY 200', place: 'SHANGHAI', year: 2026 },
-      { file: 'china-04.jpg', slot: 'Guilin river, figures small in frame — vertical', orientation: 'v', film: 'KODAK PORTRA 400', place: 'GUILIN', year: 2026 },
-      { file: 'china-05.jpg', slot: 'Bicycles and rain — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: 'BEIJING', year: 2026 },
-      { file: 'china-06.jpg', slot: 'Noodle shop interior — horizontal', orientation: 'h', film: 'LUCKY 200', place: 'BEIJING', year: 2026 },
-      { file: 'china-07.jpg', slot: 'Woman with an umbrella — vertical', orientation: 'v', film: 'KODAK GOLD 200', place: 'SHANGHAI', year: 2026, pair: true },
-      { file: 'china-08.jpg', slot: 'Doorway, red paint — vertical', orientation: 'v', film: 'KODAK GOLD 200', place: "XI'AN", year: 2026 },
-      { file: 'china-09.jpg', slot: 'Overpass, commuters — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: 'SHANGHAI', year: 2026 },
-      { file: 'china-10.jpg', slot: 'Old men playing cards — horizontal', orientation: 'h', film: 'LUCKY 200', place: 'GUILIN', year: 2026 },
-      { file: 'china-11.jpg', slot: 'Hands counting money — vertical', orientation: 'v', film: 'KODAK PORTRA 400', place: "XI'AN", year: 2026 },
-      { file: 'china-12.jpg', slot: 'Empty street, early — horizontal', orientation: 'h', film: 'KODAK GOLD 200', place: 'BEIJING', year: 2026 },
+      // ── Beijing ──────────────────────────────────────────────
+      { file: 'dscf2327.jpg', slot: 'Man at the balustrade, Kunming Lake', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2292.jpg', slot: 'Seventeen-Arch Bridge in the haze, birds crossing', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026, pair: true },
+      { file: 'dscf2217.jpg', slot: 'Man mopping the jetty, seen between red columns', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2213.jpg', slot: 'Painted eaves and gold dragons', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'img6469.jpg', slot: 'Security guard walking away through heavy snow', orientation: 'v', gear: 'IPHONE 15 PRO MAX', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2433.jpg', slot: 'Forbidden City roofs above the red wall', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2460.jpg', slot: 'Corner pavilion, low sun on the brackets', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026, pair: true },
+      { file: 'dscf2474.jpg', slot: 'Two women in hanfu on the cobbles', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2439.jpg', slot: 'Adjusting a headpiece against the red wall', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2499.jpg', slot: 'Roofline running to the hill behind', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'dscf2512.jpg', slot: 'Carved balustrade, the new towers in the haze behind', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'BEIJING', year: 2026 },
+      { file: 'film-0017.jpg', slot: 'Notes, coins and cigarettes under the incense burner', orientation: 'h', film: 'COLOUR NEGATIVE', place: 'BEIJING', year: 2026 },
+
+      // ── Xi'an ────────────────────────────────────────────────
+      { file: 'dscf2745.jpg', slot: 'One warrior still standing in the pit', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: "XI'AN", year: 2026 },
+      { file: 'dscf2809.jpg', slot: 'Man waving from a red cargo trike, thermos in hand', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'dscf2825.jpg', slot: 'Trinket stall under the brick arch', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026, pair: true },
+      { file: 'dscf2822.jpg', slot: 'Prayer ribbons, all of them red', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'dscf2837.jpg', slot: 'Two stalls, two cooks, Muslim Quarter', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'dscf2838.jpg', slot: 'Pomegranates and a man who has seen the camera', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'film-0069.jpg', slot: 'The street through a rickshaw window', orientation: 'v', film: 'COLOUR NEGATIVE', place: "XI'AN", year: 2026 },
+      { file: 'dscf2841.jpg', slot: 'Steam off the buns, two women working', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'dscf2843.jpg', slot: 'Juice stall, phone, a moment of nothing', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: "XI'AN", year: 2026 },
+      { file: 'film-0046.jpg', slot: 'Two women in hanfu, from behind', orientation: 'v', film: 'COLOUR NEGATIVE', place: "XI'AN", year: 2026 },
+      { file: 'dscf2937.jpg', slot: 'Lanterns going out of focus down the street', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: "XI'AN", year: 2026 },
+
+      // ── Guilin ───────────────────────────────────────────────
+      { file: 'dscf3123.jpg', slot: 'Karst peaks in cloud, two boats on the river', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'GUILIN', year: 2026 },
+      { file: 'dscf3250.jpg', slot: 'Cigarette, red star cap, waiting by the boat', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026 },
+      { file: 'dscf3252.jpg', slot: 'Threshing by hand into a wooden box', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026 },
+      { file: 'dscf3254.jpg', slot: 'Rapeseed flowers on the dashboard', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026, pair: true },
+      { file: 'dscf3261.jpg', slot: 'Red slippers on a millstone', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026 },
+      { file: 'dscf3267.jpg', slot: 'Fish traps and birdcages on a wall', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026 },
+      { file: 'dscf3165.jpg', slot: 'Shoulder pole past a rack of shirts, night', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'GUILIN', year: 2026 },
+
+      // ── Hangzhou ─────────────────────────────────────────────
+      { file: 'dscf3355.jpg', slot: 'One boat on the lake, the city behind it', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'HANGZHOU', year: 2026, pair: true },
+      { file: 'dscf3370.jpg', slot: 'Rowing boat, two passengers, flat light', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'HANGZHOU', year: 2026 },
+      { file: 'dscf3416.jpg', slot: 'Boatman taking a call in the garden', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'HANGZHOU', year: 2026 },
+      { file: 'film-0015.jpg', slot: 'Empty corridor, wishes tied to the lattice', orientation: 'h', film: 'COLOUR NEGATIVE', place: 'HANGZHOU', year: 2026 },
+      { file: 'dscf3522.jpg', slot: 'Parasols stacked on a moored boat', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'HANGZHOU', year: 2026 },
+
+      // ── Shanghai ─────────────────────────────────────────────
+      { file: 'dscf3637.jpg', slot: 'A ceiling of red lanterns', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'SHANGHAI', year: 2026 },
+      { file: 'dscf3640.jpg', slot: 'Monk sitting in the last of the light', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'SHANGHAI', year: 2026 },
     ],
   },
   {

@@ -300,3 +300,79 @@ photographs are committed. `src/images/*/.gitkeep` keeps the six folders in git.
 - The frame counts in the handoff (24 / 38 / 31) describe a bigger edit than the
   10 / 12 / 10 currently listed. Add lines to `frames.ts` as photographs arrive;
   the counts follow automatically.
+
+
+---
+
+# Session 3 — the China edit
+
+**6 September 2026.** First real photographs on the site: 37 frames from
+`~/Documents/Photography/Portfolio/China`, imported as the China series.
+
+## What the files turned out to be
+
+Not what the design mock assumed. The handoff's sample metadata line was
+`CANON EOS 500 · 50MM F/1.4 · KODAK PORTRA 400 · GUILIN, 2026` for every frame.
+The actual folder is:
+
+| Source | Count | EXIF |
+|---|---|---|
+| Fujifilm X-T5, XF 50mm f/2 | 14 | full |
+| Fujifilm X-T5, XF 27mm f/2.8 | 18 | full |
+| iPhone 15 Pro Max | 1 | full |
+| Film scans (`Pedro Pujol_00xx`, Lightroom, 240dpi, 3:2) | 4 | **none** |
+
+So a single global camera line would have been a lie on 36 of 37 frames. Added
+an optional per-frame `gear` field that overrides `site.camera`, and a `film`
+field that is simply omitted for digital frames. The metadata line composes from
+whichever parts exist, so a digital frame reads
+`FUJIFILM X-T5 · XF 27MM F/2.8 · GUILIN, 2026` with no film stock invented.
+
+Camera, lens and aperture came from Spotlight metadata (`mdls`), not from
+guesswork. Dates came from `kMDItemContentCreationDate`.
+
+## The sequence
+
+Chronological, which for a trip is also the narrative: Beijing (12) → Xi'an (11)
+→ Guilin (7) → Hangzhou (5) → Shanghai (2). Every frame was looked at before
+being placed; the order is not filename order.
+
+Five pairs, chosen where two frames genuinely rhyme rather than to fill space —
+the two Summer Palace lake views, two Forbidden City verticals, the stall and
+the prayer ribbons, the dashboard flowers and the slippers on the millstone, the
+two West Lake boats.
+
+Cover is `dscf2433.jpg` (Forbidden City roofs over the red wall) — it crops well
+to the 7-column band and its red sits next to the series accent `#9E2B25`
+without fighting it.
+
+`places` on the series is now the real itinerary, so the mono line reads
+`BEIJING, XI'AN, GUILIN, HANGZHOU, SHANGHAI — 2026 — 37 FRAMES`. The count is
+derived, as before.
+
+## Filenames
+
+Kept the camera's own stems, lowercased: `dscf2327.jpg`, `img6469.jpg`. The film
+scans were renamed `film-0015.jpg` etc. (the originals had a space and capitals
+in the name). Keeping the stem means any frame on the site can be traced back to
+the raw file in Lightroom.
+
+## Guessed, and needs confirming
+
+Flagged to Pedro rather than presented as fact:
+
+- The four film scans have no EXIF at all. Their camera line falls back to
+  `site.camera` (`CANON EOS 500 · 50MM F/1.4`) and their stock is the placeholder
+  `COLOUR NEGATIVE`.
+- Locations were read off the pictures. Beijing, Xi'an and Guilin are certain
+  (Seventeen-Arch Bridge, terracotta pit, Muslim Quarter signage, Li River
+  karst). **Hangzhou and Shanghai are inference from dates and subject**, and the
+  film frames' locations are the least certain of all.
+- Sources are 2048px on the long edge, which is modest for the full-screen view.
+  Fine at the sizes used; worth re-exporting larger if a frame is ever printed
+  or wanted full-bleed.
+
+## Size
+
+`dist` is now 88MB (198 generated WebP renditions from 37 sources). Well within
+GitHub Pages limits, but worth watching once Workers and Japan are filled in.

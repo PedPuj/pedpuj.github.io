@@ -86,15 +86,21 @@ There are two steps: **put the file somewhere**, and **add a line to the list**.
 | Folder | What goes in it |
 |---|---|
 | `src/images/home/` | `hero.jpg` — the single homepage photograph |
-| `src/images/workers/` | The Workers series, plus `cover.jpg` for the `/work` page |
-| `src/images/china/` | The China series, plus `cover.jpg` |
-| `src/images/japan/` | The Japan series, plus `cover.jpg` |
+| `src/images/workers/` | The Workers series |
+| `src/images/china/` | The China series |
+| `src/images/japan/` | The Japan series |
 | `src/images/loose/` | Everything loose |
 | `src/images/about/` | `portrait.jpg` — the photo of you |
 
 Export at full quality, 2500px on the long edge is plenty. **Do not shrink or
 compress them yourself** — the site does that automatically and does it better.
-Use plain filenames: lowercase, dashes instead of spaces, no accents.
+Use plain filenames: lowercase, no spaces, no accents. Keeping the camera's own
+number (`dscf2327.jpg`) is a good idea — it means you can always find the raw
+file again.
+
+Each series also needs a **cover** for the `/work` page. That is just one of the
+series' own photographs, named on the `cover:` line near the top of that series
+in `frames.ts`.
 
 ### Step 2 — add a line to the edit
 

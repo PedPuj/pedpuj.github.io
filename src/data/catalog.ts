@@ -26,7 +26,10 @@ const pad = (n: number) => String(n).padStart(3, '0');
 
 function metadataLine(f: FrameInput): string {
   const where = [f.place, f.year].filter(Boolean).join(', ');
-  return [site.camera, f.film, where].filter(Boolean).join(' · ').toUpperCase();
+  return [f.gear ?? site.camera, f.film, where]
+    .filter(Boolean)
+    .join(' · ')
+    .toUpperCase();
 }
 
 export interface Frame {
