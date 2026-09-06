@@ -127,7 +127,7 @@ export function counterText(index: number, total: number): string {
 
 /** The single full-bleed photograph on the homepage. */
 export const heroImage = lookup('home', 'hero.jpg');
-export const heroSlot = 'Homepage hero — one strong frame, full bleed, horizontal';
+export const heroSlot = 'Roofline running to the hill behind, Beijing';
 
 /** The photograph of the photographer on the About page. */
 export const aboutImage = lookup('about', 'portrait.jpg');

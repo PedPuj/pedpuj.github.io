@@ -11,7 +11,7 @@ export const site = {
     'Street, documentary and analogue photography. Mostly film, mostly Sevilla.',
 
   /** The mono line in the bottom-left corner of the homepage. */
-  homeMonoLine: 'SEVILLA, SPAIN — 35MM',
+  homeMonoLine: 'BEIJING, CHINA — 50MM',
 
   /** Shown on the About page, and used for the Email link. */
   email: 'hello@bedro.com',
