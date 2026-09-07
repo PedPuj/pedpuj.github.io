@@ -5,7 +5,7 @@ import SeriesRail from '../../components/SeriesRail.astro';
 import ChapterMark from '../../components/ChapterMark.astro';
 import FrameView from '../../components/Frame.astro';
 import FramePair from '../../components/FramePair.astro';
-import { allSeries, nextSeriesLine } from '../../data/catalog';
+import { allSeries, nextSeriesLine, ratioOf, isUpright } from '../../data/catalog';
 import type { Chapter, Frame } from '../../data/catalog';
 
 export function getStaticPaths() {
@@ -44,16 +44,41 @@ for (let i = 0; i < series.frames.length; i += 1) {
   blocks.push(chapter ? { frames: group, chapter } : { frames: group });
 }
 
-// A photograph that opens a city is held a little shorter, so its chapter
-// line still fits on the same screen once the page has snapped to it.
-const capOf = (block: Block, pair: boolean) =>
-  pair
-    ? block.chapter
-      ? '46vh'
-      : '56vh'
-    : block.chapter
-      ? '62vh'
-      : '78vh';
+// How tall a photograph is allowed to be, as two limits met with `min()`.
+//
+//   the taste cap — an upright is given more height than a landscape. On a
+//     screen wider than it is tall the upright is the shape that loses: at
+//     one shared cap a landscape covers 739,000px² and an upright 328,000,
+//     which is why every upright in the China edit read as a small picture.
+//     Two uprights side by side lose most of all, and get the most back.
+//
+//   the fit cap — and never so tall that the paper around it closes up, or,
+//     for a photograph that opens a city, that the chapter line above it has
+//     nowhere to sit. Both are `--fit` / `--fit-open`, set on the sequence
+//     below in viewport units, so a tall window gives its extra height to
+//     the photograph rather than to the margins.
+//
+// The old rule was a flat 62vh for an opening against 78vh everywhere else,
+// which made the first photograph of every city the smallest one in it — the
+// height was being taken from the picture to pay for the type. Under `min()`
+// an opening is only shortened when the screen actually demands it.
+const capOf = (block: Block) => {
+  const pair = block.frames.length === 2;
+  const upright = block.frames.every(isUpright);
+  const taste = pair ? (upright ? '72vh' : '56vh') : upright ? '88vh' : '78vh';
+  return `min(${taste}, var(${block.chapter ? '--fit-open' : '--fit'}))`;
+};
+
+// How wide that makes it — the same sum the photograph and the pair each
+// already do for themselves, done once more here so a chapter line can be
+// given the width of what it introduces rather than the width of the page.
+const widthOf = (block: Block) => {
+  const cap = capOf(block);
+  const sum = block.frames.reduce((total, frame) => total + ratioOf(frame), 0);
+  return block.frames.length === 2
+    ? `min(100%, calc(${sum} * ${cap} + var(--gutter)))`
+    : `min(100%, calc(${sum} * ${cap}))`;
+};
 const next = nextSeriesLine(series);
 ---
 
@@ -71,7 +96,7 @@ const next = nextSeriesLine(series);
               frames={block.frames as [Frame, Frame]}
               treatment={series.treatment}
               eager={i === 0}
-              cap={capOf(block, true)}
+              cap={capOf(block)}
               anchor
             />
           ) : (
@@ -79,7 +104,7 @@ const next = nextSeriesLine(series);
               frame={block.frames[0]}
               treatment={series.treatment}
               eager={i === 0}
-              maxHeight={capOf(block, false)}
+              maxHeight={capOf(block)}
               anchor
             />
           );
@@ -88,7 +113,7 @@ const next = nextSeriesLine(series);
           // inside is still what the scroll settles on, and the line simply
           // rides above it.
           return block.chapter ? (
-            <div class="opening">
+            <div class="opening" style={`width: ${widthOf(block)}`}>
               <ChapterMark chapter={block.chapter} />
               {view}
             </div>
@@ -120,15 +145,33 @@ const next = nextSeriesLine(series);
     /* Roughly a quarter of the screen of empty paper between frames. */
     gap: 25vh;
     padding: 120px var(--margin) 0;
+
+    /* The two ceilings `capOf` measures its taste caps against.
+       A frame is centred in the screen below the header, so whatever is
+       asked for above or below it is paid for twice — once at each end.
+
+         --fit       at least 40px of paper above and below the photograph,
+                     so a tall picture never reaches the edges of the screen.
+         --fit-open  and, above a photograph that opens a city, room for the
+                     chapter line: the rule, its type, and 24px of clearance
+                     under the header. */
+    --paper-clear: 80px;
+    --line-room: 194px;
+    --fit: calc(100vh - var(--series-header-h) - var(--safe-top) - var(--paper-clear));
+    --fit-open: calc(100vh - var(--series-header-h) - var(--safe-top) - var(--line-room));
   }
 
-  /* A city's name and its first photograph, held together as one page. */
+  /* A city's name and its first photograph, held together as one page — and
+     held to one width, the photograph's, which the page works out and sets
+     inline. The chapter line inside then spans exactly the picture it names
+     instead of the full measure: at Guilin, which opens on an upright, the
+     rule used to run three and a half times the width of the photograph
+     under it and read as a bar across the page rather than as its caption. */
   .opening {
-    align-self: stretch;
     display: flex;
     flex-direction: column;
     gap: 26px;
-    width: 100%;
+    max-width: 100%;
   }
 
   /* A little further to travel into a new city than between two frames

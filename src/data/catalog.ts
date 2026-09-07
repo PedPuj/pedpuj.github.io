@@ -53,6 +53,25 @@ export interface Frame {
   next: string | null;
 }
 
+/**
+ * How wide a frame is for its height. The real proportions where the file
+ * exists, and the declared orientation until it does — so a frame that has
+ * not arrived yet still reserves a box of roughly the right shape.
+ *
+ * Lives here because three things now need the same answer: the photograph
+ * itself, a pair working out how to share a line, and the series page
+ * working out how wide to draw a chapter's rule.
+ */
+export function ratioOf(frame: Frame): number {
+  if (frame.image) return frame.image.width / frame.image.height;
+  return frame.orientation === 'v' ? 2 / 3 : 3 / 2;
+}
+
+/** True when a frame is taller than it is wide. */
+export function isUpright(frame: Frame): boolean {
+  return ratioOf(frame) < 1;
+}
+
 function build(collection: string, inputs: FrameInput[]): Frame[] {
   return inputs.map((f, i) => {
     const id = `${collection}-${pad(i + 1)}`;

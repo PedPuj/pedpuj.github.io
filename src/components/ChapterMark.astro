@@ -37,8 +37,11 @@ const { chapter } = Astro.props;
 
 <style>
   .chapter {
-    /* Spans the full measure, unlike the photographs, which are centred on
-       their own width. The rule is what makes the break read as a break. */
+    /* Spans its parent, and the parent — `.opening` on the series page — is
+       held to the width of the photograph below. So the rule is exactly as
+       wide as the picture it introduces, the city's name sits on that
+       picture's left edge and the frame range on its right. It reads as the
+       photograph's caption rather than as a bar drawn across the page. */
     align-self: stretch;
     width: 100%;
   }
@@ -54,7 +57,13 @@ const { chapter } = Astro.props;
   .line {
     display: flex;
     align-items: baseline;
-    gap: var(--gutter);
+    /* The rule is now only as wide as the photograph, and an upright on a
+       short window makes that narrow — Guilin at 1024x650 leaves the name
+       and the frame range about 10px apart. Rather than let the range run
+       off the end of the rule, it drops under the name. It costs 19px of
+       height, which `--line-room` on the series page has the slack for. */
+    flex-wrap: wrap;
+    gap: 2px var(--gutter);
     width: 100%;
   }
 
@@ -78,8 +87,8 @@ const { chapter } = Astro.props;
     user-select: none;
   }
 
-  /* Pushed to the far edge of the measure, so the two ends of the line hold
-     the width the photographs sit inside. */
+  /* Pushed to the far edge, so the two ends of the line sit on the two
+     edges of the photograph. */
   .range {
     margin-left: auto;
     color: var(--ink-2);

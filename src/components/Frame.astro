@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { ratioOf } from '../data/catalog';
 import type { Frame } from '../data/catalog';
 
 interface Props {
@@ -34,12 +35,7 @@ const {
   style: extraStyle = '',
 } = Astro.props;
 
-// The real proportions where the file exists; the declared orientation until then.
-const ratio = frame.image
-  ? frame.image.width / frame.image.height
-  : frame.orientation === 'v'
-    ? 2 / 3
-    : 3 / 2;
+const ratio = ratioOf(frame);
 
 // A mount adds 32px of card either side plus its hairline.
 const chrome = treatment === 'mount' ? 66 : 0;

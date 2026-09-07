@@ -1,5 +1,6 @@
 ---
 import FrameView from './Frame.astro';
+import { ratioOf } from '../data/catalog';
 import type { Frame } from '../data/catalog';
 
 interface Props {
@@ -19,13 +20,6 @@ const {
   cap = '56vh',
   class: className = '',
 } = Astro.props;
-
-const ratioOf = (frame: Frame) =>
-  frame.image
-    ? frame.image.width / frame.image.height
-    : frame.orientation === 'v'
-      ? 2 / 3
-      : 3 / 2;
 
 const ratios = frames.map(ratioOf);
 const sum = ratios[0] + ratios[1];

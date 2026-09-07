@@ -754,3 +754,97 @@ doing) — because none could be reproduced on a warm desktop. The thing that
 actually solved it was Pedro's observation about *which* photographs flicker.
 Ask for that kind of detail earlier: "which cases don't do it" is worth more
 than any amount of instrumenting the cases that do.
+
+---
+
+# Sizing the photographs by their shape (7 Sep 2026)
+
+Pedro asked whether the China spread was "pretty enough or well organised
+enough". The answer was that it was well organised and not yet well composed,
+and the review that says why — with all 32 pages drawn to scale — is
+`design/china-flat-plan.html`. Two of the six faults it names are fixed here.
+
+## The diagnosis
+
+Every size on the page came from one number, a cap on the photograph's
+**height**, and that cap took four values: 78vh, 62vh for a city's first
+photograph, 56vh for a pair, 46vh for a pair that also opened a city. Width was
+whatever the aspect ratio then made it. So the shape of every page was decided
+by the proportions of the photograph and nothing else. Of the 32 pages, 23 were
+one photograph at exactly the same height in exactly the same place, and 18 of
+those were the identical 1053 × 702 rectangle.
+
+## What changed
+
+**`capOf` is now two limits met with `min()`.** A *taste* cap — an upright asks
+for 88vh, a landscape 78vh, two uprights side by side 72vh rather than 56 — met
+with a *fit* cap, `--fit` / `--fit-open` on `.sequence`, which is the height the
+screen actually has once 40px of paper is left above and below, and once a
+chapter line has somewhere to sit above an opening.
+
+Measured at 1440 × 900 (`--series-header-h` is 72 on desktop, not 64 — worth
+remembering, the fit calc depends on it):
+
+| | before | after | area |
+|---|---|---|---|
+| upright | 468 × 702 | 499 × 748 | +14% |
+| two uprights side by side | 336 × 504 | 432 × 648 | +65% |
+| a city's first photograph | 837 × 558 | 951 × 634 | +29% |
+| Hangzhou's opening pair, each | 276 × 414 | 423 × 634 | +135% |
+| landscape | 1053 × 702 | unchanged | — |
+
+Why uprights get more: on a screen wider than it is tall, the upright is the
+shape that loses. At one shared cap a landscape covered 739,000px² and an
+upright 328,000 — 44% — and fourteen of China's 37 frames are uprights,
+including 037, the photograph the whole series closes on.
+
+The `min()` also means an opening is shortened *only when the window demands
+it*, rather than by a flat 62vh every time. The old rule made the first
+photograph of every city the smallest one in it: the height was being taken
+from the picture to pay for the type.
+
+**The chapter rule now spans its photograph, not the measure.** `.opening` is
+given the width the photograph works out for itself (`widthOf`, the same sum
+`Frame` and `FramePair` each already do), so the rule inside it lands on the
+picture's two edges. Guilin's rule went from 1312px to 423px. It had been
+running three and a half times the width of the upright it introduced, which
+read as a bar across the page rather than as that photograph's caption.
+
+`.line` in `ChapterMark` gained `flex-wrap: wrap` for the consequence: a narrow
+rule on a short window can bring the city's name and the frame range within
+about 10px of each other (Guilin at 1024 × 650), and the range now drops onto a
+second line rather than running off the end of the rule.
+
+**`ratioOf` and `isUpright` moved to `catalog.ts`.** The same four lines of
+aspect-ratio logic were in `Frame.astro` and `FramePair.astro`, and the series
+page now needs the answer too.
+
+## Checked
+
+Build clean, no console errors, Japan unaffected (no chapters, so no openings
+and no rail), phones unchanged — an upright there was already clamped by the
+measure, not by the height cap. Snap landings still exact: drift 0 across
+twelve stops, singles, pairs and openings alike.
+
+## Still open
+
+**Fault 4 is improved, not eliminated.** A city's first photograph is still
+shorter than a normal one (634 against 702), because the chapter line genuinely
+needs the room above it. Closing that gap means centring the *line and the
+photograph together* rather than the photograph alone — i.e. moving
+`scroll-snap-align` from the frame to `.opening`. That is the snapping
+behaviour that took three attempts to get right, so it was left alone here.
+
+**Two faults are edit decisions, not layout ones**, and they are Pedro's:
+
+- Frames 009–014 are six near-identical landscapes in a row (four to close
+  Beijing, then Xi'an opens on a fifth and a sixth). Guilin repeats it at
+  025–026 and 029–030. Moving one upright into the run fixes it.
+- Shanghai is two frames carrying a full chapter heading. The journey runs
+  12 · 11 · 7 · 5 · 2 and stops rather than closing.
+
+**Not built, still the strongest remaining move:** a `size` word on a frame —
+`'full'` (≈92vh, near the measure) or `'quiet'` (≈58vh), left off every other
+line, exactly like `pair`. This is the "asymmetric editorial grid" that earlier
+notes set aside as needing a decision per photograph. It doesn't: it needs a
+decision on six or seven frames per series and the rest inherit.
