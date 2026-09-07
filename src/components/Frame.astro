@@ -50,7 +50,12 @@ const style = [
   .join('; ');
 
 const Tag = link ? 'a' : 'div';
-const attrs = link ? { href: frame.href } : {};
+// Warm the full-screen view on hover, so the click lands on a page that is
+// already there.
+const attrs = link ? { href: frame.href, 'data-astro-prefetch': 'hover' } : {};
+
+// The frame's own number, as it would be written on a contact sheet.
+const number = String(frame.index).padStart(3, '0');
 ---
 
 <figure
@@ -84,6 +89,11 @@ const attrs = link ? { href: frame.href } : {};
         )
       }
     </span>
+    {link && (
+      <span class="mono tag" aria-hidden="true">
+        {number}
+      </span>
+    )}
   </Tag>
 </figure>
 
@@ -98,8 +108,34 @@ const attrs = link ? { href: frame.href } : {};
   /* Width is derived from the height cap, so the photograph is never
      taller than --max-h and never wider than the paper allows. */
   .target {
+    position: relative;
     display: block;
     width: min(100%, calc(var(--max-h) * var(--ar) + var(--chrome)));
+  }
+
+  /* The number sits on the paper below the photograph and appears only on
+     hover — quietly saying the frame opens, without ever putting a mark on
+     the image or leaving anything on the page at rest. It is positioned out
+     of flow so the sequence never shifts. */
+  .tag {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 12px;
+    color: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+
+  .target:hover .tag,
+  .target:focus-visible .tag {
+    opacity: 1;
+  }
+
+  /* Line it up with the photograph, not the mount board around it. */
+  .mount .tag {
+    left: 32px;
   }
 
   .fill .target {
@@ -152,6 +188,10 @@ const attrs = link ? { href: frame.href } : {};
   @media (max-width: 768px) {
     .mount .mat {
       padding: 16px;
+    }
+
+    .mount .tag {
+      left: 16px;
     }
   }
 </style>

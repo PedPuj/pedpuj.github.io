@@ -14,7 +14,7 @@ import { looseFrames } from '../data/catalog';
     <div class="sheet">
       {
         looseFrames.map((frame) => (
-          <a class="thumb" href={frame.href}>
+          <a class="thumb" href={frame.href} data-astro-prefetch="hover">
             {frame.image ? (
               <Image
                 src={frame.image}
