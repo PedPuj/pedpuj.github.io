@@ -56,6 +56,14 @@
 
 html {
   background: var(--ground);
+  /* Loose, About and the homepage are short enough to fit the window, so they
+     have no scrollbar, while /work and the series pages do. Where the
+     scrollbar is a classic one that takes width, that made those pages 15px
+     narrower — and everything anchored to the right, which is the whole nav,
+     jumped sideways as you moved between them. The gutter is now reserved
+     whether or not the page scrolls, so the measure never changes. Browsers
+     with overlay scrollbars are unaffected: there is no width to reserve. */
+  scrollbar-gutter: stable;
 }
 
 body {

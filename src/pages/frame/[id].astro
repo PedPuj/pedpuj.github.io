@@ -91,7 +91,8 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100vw;
+    /* See the note on .hero: 100vw includes the reserved gutter. */
+    width: 100%;
     min-height: 100vh;
     min-height: 100svh;
     background: var(--lightbox);
@@ -109,7 +110,7 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     justify-content: center;
     /* Definite width, so the layout box comes from the height cap and the real
        proportions — not from whichever srcset rendition the browser picked. */
-    width: min(calc(100vw - var(--margin) * 2), calc(var(--cap) * var(--ar)));
+    width: min(calc(100% - var(--margin) * 2), calc(var(--cap) * var(--ar)));
   }
 
   .stage :global(img) {
