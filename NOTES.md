@@ -702,3 +702,55 @@ and never were: they fall back to the system CJK face, which is the intention.
 warm and the connection is fast, and with everything cached the page paints
 complete on the first frame. It is the strongest remaining candidate rather
 than a proven diagnosis, and wants confirming on Pedro's phone.
+
+## The flicker, found (7 Sep 2026)
+
+Pedro: *"when closing a photo, the first photo does not flicker, the rest of
+them flicker."*
+
+That one sentence gives the whole answer, and it was never the fonts.
+
+Every photograph is `opacity: 0` until its `load` fires, then fades in over
+400ms — the deliberate no-spinner loading state. On a series page exactly one
+frame is `loading="eager"`: the first. So:
+
+- Close the **first** photograph → you land at the top of the page → its frame
+  is the eager one, already complete when the fade script runs, so it takes the
+  `img.complete` branch and appears instantly. No flicker.
+- Close **any other** → you land back at your reading position, where every
+  frame is lazy. The browser only begins fetching the picture you were looking
+  at one second ago once layout has settled, and then it dissolves in over
+  400ms from the empty block. About half a second of visible "loading" on a
+  photograph that never left the cache — which is precisely "it loads the web
+  and then like loads it again".
+
+Invisible on a desktop with a warm cache and a fast decode. Obvious on a phone.
+
+Two changes:
+
+**The photograph you are returning to is fetched at once.** `astro:after-swap`
+knows the frame you came from, so it finds that link's image on the incoming
+page and sets `loading="eager"`, `fetchpriority="high"`, `decoding="sync"`
+before the browser has laid anything out.
+
+**A photograph out of the cache is not faded in at all.** `fadeIn` now times
+the wait: under 150ms and it is shown at once, with the transition suppressed,
+exactly as an already-complete image is. Only a photograph that genuinely took
+a moment to arrive gets the fade. This is the general fix — it covers the
+neighbouring frames on screen too, not just the one returned to.
+
+Also, while in there: the scroll restore now lifts `scroll-snap-type` across
+the `scrollTo` and re-asserts the position on the next frame. A hand-set scroll
+and a mandatory snap container disagree on some browsers — the position is
+taken and then quietly corrected a frame or two later, which reads as the page
+jumping on arrival. Belt and braces; not proven to be part of this.
+
+### Diagnosis note
+
+Three rounds were spent on the wrong causes — a stale identifier aborting the
+view transition (real, fixed), a background transition catching the page change
+(real, fixed), and the render-blocking font stylesheets (real, fixed, and worth
+doing) — because none could be reproduced on a warm desktop. The thing that
+actually solved it was Pedro's observation about *which* photographs flicker.
+Ask for that kind of detail earlier: "which cases don't do it" is worth more
+than any amount of instrumenting the cases that do.

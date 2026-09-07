@@ -81,20 +81,41 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
 </html>
 
 <script>
+  /** Already here: show it now, with no fade at all. */
+  function showAtOnce(img: HTMLImageElement) {
+    img.style.transition = 'none';
+    img.classList.add('is-loaded');
+    void img.offsetWidth;
+    img.style.transition = '';
+  }
+
   // Every photograph fades in over 400ms once it is actually decoded.
   // No spinner, no skeleton: the flat block behind it is the loading state.
+  //
+  // But only a photograph that genuinely took a moment to arrive. One that
+  // comes straight back out of the cache is shown at once — otherwise
+  // closing a photograph and landing where you were reading blanks the
+  // picture you were looking at a second ago and dissolves it back in, which
+  // looks for all the world like the page reloading. That is why closing the
+  // *first* photograph never did it: its frame is the one loaded eagerly, so
+  // it was always complete by the time this ran, while every other frame on
+  // the page is lazy and had to be fetched again on arrival.
   function fadeIn(img: HTMLImageElement) {
     if (img.dataset.faded === 'true') return;
     img.dataset.faded = 'true';
+
     if (img.complete && img.naturalWidth > 0) {
-      img.style.transition = 'none';
-      img.classList.add('is-loaded');
-      void img.offsetWidth;
-      img.style.transition = '';
+      showAtOnce(img);
       return;
     }
-    img.addEventListener('load', () => img.classList.add('is-loaded'), { once: true });
-    img.addEventListener('error', () => img.classList.add('is-loaded'), { once: true });
+
+    const asked = performance.now();
+    const done = () => {
+      if (performance.now() - asked < 150) showAtOnce(img);
+      else img.classList.add('is-loaded');
+    };
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
   }
 
   function run() {
@@ -134,11 +155,39 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
     if (navType === 'traverse') return;
     if (!cameFrom || !isFrame(cameFrom)) return;
     if (isFrame(location.pathname)) return;
+
+    // The photograph you were just looking at is the one you are about to be
+    // looking at again. It is in the cache, but its frame is marked lazy, so
+    // left alone the browser does not begin to think about it until layout
+    // has settled — easily long enough to show the empty block first.
+    const returning = document.querySelector<HTMLImageElement>(
+      `a[href="${cameFrom}"] img`,
+    );
+    if (returning) {
+      returning.loading = 'eager';
+      returning.decoding = 'sync';
+      returning.setAttribute('fetchpriority', 'high');
+    }
+
+    let stored: string | null = null;
     try {
-      const y = sessionStorage.getItem(key(location.pathname));
-      if (y !== null) window.scrollTo(0, Number(y));
+      stored = sessionStorage.getItem(key(location.pathname));
     } catch {
       /* see above */
     }
+    if (stored === null) return;
+    const y = Number(stored);
+
+    // A scroll set by hand and a mandatory snap container disagree on some
+    // browsers: the position is taken, then quietly corrected a frame or two
+    // later, which is the page appearing to jump on arrival. Lift the
+    // snapping across the restore, and put it back once the position holds.
+    const root = document.documentElement;
+    root.style.setProperty('scroll-snap-type', 'none');
+    window.scrollTo(0, y);
+    requestAnimationFrame(() => {
+      if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      root.style.removeProperty('scroll-snap-type');
+    });
   });
 </script>
