@@ -82,4 +82,42 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
 
   run();
   document.addEventListener('astro:page-load', run);
+
+  // Closing a photograph should put you back where you were reading, not at
+  // the top. The full-screen view is a real route, so returning from it is a
+  // forward navigation and Astro quite correctly scrolls to top. Remember the
+  // position of the page a frame was opened from, and restore it on the way
+  // back. Doing it this way rather than history.back() means it still works
+  // after arrowing through several frames first.
+  let cameFrom: string | null = null;
+  let navType: string | null = null;
+
+  const key = (path: string) => `bedro:scroll:${path}`;
+  const isFrame = (path: string) => path.startsWith('/frame/');
+
+  document.addEventListener('astro:before-preparation', (event) => {
+    const e = event as unknown as { from: URL; to: URL; navigationType: string };
+    cameFrom = e.from.pathname;
+    navType = e.navigationType;
+    if (!isFrame(cameFrom)) {
+      try {
+        sessionStorage.setItem(key(cameFrom), String(window.scrollY));
+      } catch {
+        /* private browsing, or storage is full — not worth failing over */
+      }
+    }
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    // Real back/forward already restores scroll; don't fight it.
+    if (navType === 'traverse') return;
+    if (!cameFrom || !isFrame(cameFrom)) return;
+    if (isFrame(location.pathname)) return;
+    try {
+      const y = sessionStorage.getItem(key(location.pathname));
+      if (y !== null) window.scrollTo(0, Number(y));
+    } catch {
+      /* see above */
+    }
+  });
 </script>
