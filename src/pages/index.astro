@@ -5,6 +5,14 @@ import Wordmark from '../components/Wordmark.astro';
 import Nav from '../components/Nav.astro';
 import { heroImage, heroSlot } from '../data/catalog';
 import { site } from '../data/site';
+
+// The hero is object-fit: cover over the whole viewport. On a portrait screen
+// that scales the photograph by HEIGHT and crops the sides away, so the slot it
+// really has to fill is 100vh x its aspect ratio — far wider than 100vw. Saying
+// "100vw" there would have the browser fetch for the phone's width and then
+// stretch it about 2.6x.
+const heroRatio = heroImage ? heroImage.width / heroImage.height : 1.5;
+const heroSizes = `(orientation: portrait) ${Math.round(heroRatio * 100)}vh, 100vw`;
 ---
 
 <Base bodyClass="home">
@@ -16,7 +24,7 @@ import { site } from '../data/site';
           src={heroImage}
           alt={heroSlot}
           widths={[900, 1400, 2000, 2800]}
-          sizes="100vw"
+          sizes={heroSizes}
           loading="eager"
           fetchpriority="high"
         />
