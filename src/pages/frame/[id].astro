@@ -60,10 +60,24 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
       <a class="close" href={backHref} aria-label="Close">✕</a>
 
       {prevHref && (
-        <a class="arrow prev" href={prevHref} aria-label="Previous frame">‹</a>
+        <a
+          class="arrow prev"
+          href={prevHref}
+          aria-label="Previous frame"
+          data-astro-prefetch="hover"
+        >
+          ‹
+        </a>
       )}
       {nextHref && (
-        <a class="arrow next" href={nextHref} aria-label="Next frame">›</a>
+        <a
+          class="arrow next"
+          href={nextHref}
+          aria-label="Next frame"
+          data-astro-prefetch="hover"
+        >
+          ›
+        </a>
       )}
 
       <p class="mono meta">{frame.metadata}</p>
@@ -82,6 +96,10 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     min-height: 100svh;
     background: var(--lightbox);
     overflow: hidden;
+    /* The swipes below own every drag: nothing scrolls or rubber-bands under
+       your finger. Pinch-to-zoom is left to the browser. */
+    touch-action: pinch-zoom;
+    overscroll-behavior: contain;
   }
 
   .stage {
@@ -111,6 +129,13 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     width: 100%;
     aspect-ratio: var(--ar);
     background: #201d1a;
+  }
+
+  /* Half the photograph steps forward, half steps back — see the script. */
+  @media (hover: hover) and (pointer: fine) {
+    .stage {
+      cursor: pointer;
+    }
   }
 
   .chrome {
@@ -152,10 +177,18 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     color: var(--paper);
   }
 
+  /* The mark is 22px of type, which is far too small to aim at. The target
+     around it is 88 x 160 — the glyph still sits 28px in from the edge and
+     centred, so nothing looks any different; there is just something there
+     to hit. */
   .arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    width: 88px;
+    height: 160px;
     font-size: 22px;
     line-height: 1;
     /* Deliberately low contrast. */
@@ -168,11 +201,15 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
   }
 
   .prev {
-    left: 28px;
+    left: 0;
+    justify-content: flex-start;
+    padding-left: 28px;
   }
 
   .next {
-    right: 28px;
+    right: 0;
+    justify-content: flex-end;
+    padding-right: 28px;
   }
 
   .meta {
@@ -237,30 +274,64 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
       else if (event.key === 'ArrowRight' && next) navigate(next);
     }
 
-    // Swipe: left/right between frames, down to close.
+    // Swipe: left/right between frames, down to close. It fires the moment
+    // the threshold is crossed rather than waiting for you to lift your
+    // finger, so the frame turns while the gesture still feels like one
+    // movement instead of landing a beat late.
     let startX = 0;
     let startY = 0;
+    let swiped = false;
 
     function onTouchStart(event: TouchEvent) {
       startX = event.changedTouches[0].clientX;
       startY = event.changedTouches[0].clientY;
+      swiped = false;
     }
 
-    function onTouchEnd(event: TouchEvent) {
+    function onTouchMove(event: TouchEvent) {
+      if (swiped) return;
       const dx = event.changedTouches[0].clientX - startX;
       const dy = event.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0 && next) navigate(next);
-        else if (dx > 0 && prev) navigate(prev);
-      } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+
+      if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy)) {
+        const to = dx < 0 ? next : prev;
+        if (!to) return;
+        swiped = true;
+        navigate(to);
+      } else if (dy > 72 && dy > Math.abs(dx)) {
+        swiped = true;
         navigate(back);
       }
     }
 
+    // Clicking the photograph steps through the sequence: its left half goes
+    // back, its right half goes on. Clicking the ground around it closes.
+    // Pointer devices only — on a phone the swipes above already do this, and
+    // a stray tap should not throw you out of the frame.
+    const stage = root.querySelector<HTMLElement>('.stage');
+
+    function onClick(event: MouseEvent) {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      // The close mark and the arrows say what they do; leave them to it.
+      if (target.closest('a')) return;
+
+      if (stage && stage.contains(target)) {
+        const box = stage.getBoundingClientRect();
+        const to = event.clientX > box.left + box.width / 2 ? next : prev;
+        if (to) navigate(to);
+        return;
+      }
+
+      navigate(back);
+    }
+
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousemove', wake);
+    root.addEventListener('click', onClick);
     root.addEventListener('touchstart', onTouchStart, { passive: true });
-    root.addEventListener('touchend', onTouchEnd, { passive: true });
+    root.addEventListener('touchmove', onTouchMove, { passive: true });
 
     document.addEventListener(
       'astro:before-swap',
