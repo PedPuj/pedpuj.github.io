@@ -12,6 +12,7 @@ const { onPhoto = false } = Astro.props;
 
 <style>
   .wordmark {
+    position: relative;
     font-family: var(--sans);
     font-weight: 500;
     font-size: 15px;
@@ -27,6 +28,20 @@ const { onPhoto = false } = Astro.props;
   @media (max-width: 768px) {
     .wordmark {
       font-size: 14px;
+    }
+  }
+
+  /* Five letters of 14px type is the whole way home from a series, and on a
+     series page it is the only thing up there to hit. Same invisible box as
+     the nav items wear. */
+  @media (pointer: coarse) {
+    .wordmark::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      right: -8px;
+      bottom: -16px;
+      left: -8px;
     }
   }
 </style>

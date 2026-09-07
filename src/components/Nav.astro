@@ -114,6 +114,21 @@ const items = [
       gap: 18px;
     }
   }
+
+  /* Same bargain the lightbox arrows strike: the type stays 13px, and an
+     invisible box around it does the catching. Only on a touch screen —
+     under a mouse the target must stay the word itself, or the underline
+     would draw while the cursor is still off in the gap beside it. */
+  @media (pointer: coarse) {
+    .nav a::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      right: -8px;
+      bottom: -16px;
+      left: -8px;
+    }
+  }
 </style>
 
 <script>
