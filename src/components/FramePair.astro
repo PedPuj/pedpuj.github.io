@@ -7,8 +7,18 @@ interface Props {
   treatment?: 'bare' | 'mount';
   eager?: boolean;
   anchor?: boolean;
+  /** Cap on the shared height of the two photographs. */
+  cap?: string;
+  class?: string;
 }
-const { frames, treatment = 'bare', eager = false, anchor = false } = Astro.props;
+const {
+  frames,
+  treatment = 'bare',
+  eager = false,
+  anchor = false,
+  cap = '56vh',
+  class: className = '',
+} = Astro.props;
 
 const ratioOf = (frame: Frame) =>
   frame.image
@@ -21,12 +31,12 @@ const ratios = frames.map(ratioOf);
 const sum = ratios[0] + ratios[1];
 
 // Widths in proportion to the aspect ratios, so the two photographs are
-// always exactly the same height. The cap keeps that height at 56vh.
+// always exactly the same height. The cap keeps that height at `cap`.
 const chrome = treatment === 'mount' ? 66 * 2 : 0;
-const maxWidth = `calc(${sum} * 56vh + var(--gutter) + ${chrome}px)`;
+const maxWidth = `calc(${sum} * ${cap} + var(--gutter) + ${chrome}px)`;
 ---
 
-<div class="pair" style={`--pair-max: ${maxWidth}`}>
+<div class:list={['pair', className]} style={`--pair-max: ${maxWidth}`}>
   {
     frames.map((frame, i) => (
       <FrameView

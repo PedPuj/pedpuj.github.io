@@ -21,26 +21,39 @@ const opens = new Map<number, Chapter>(series.chapters.map((c) => [c.from, c]));
 // frame marked `pair` sitting beside the one after it — unless that one
 // starts a new city, in which case the pair is dropped rather than carried
 // across the break.
-type Block =
-  | { kind: 'chapter'; chapter: Chapter }
-  | { kind: 'frames'; frames: Frame[] };
+interface Block {
+  frames: Frame[];
+  /** Set when this is the first group of a new city. */
+  chapter?: Chapter;
+}
 
 const blocks: Block[] = [];
 for (let i = 0; i < series.frames.length; i += 1) {
   const frame = series.frames[i];
   const chapter = opens.get(frame.index);
-  if (chapter) blocks.push({ kind: 'chapter', chapter });
-
   const partner = series.frames[i + 1];
+
+  let group: Frame[];
   if (frame.pair && partner && !opens.has(partner.index)) {
-    blocks.push({ kind: 'frames', frames: [frame, partner] });
+    group = [frame, partner];
     i += 1;
   } else {
-    blocks.push({ kind: 'frames', frames: [frame] });
+    group = [frame];
   }
+
+  blocks.push(chapter ? { frames: group, chapter } : { frames: group });
 }
 
-const firstFrames = blocks.findIndex((b) => b.kind === 'frames');
+// A photograph that opens a city is held a little shorter, so its chapter
+// line still fits on the same screen once the page has snapped to it.
+const capOf = (block: Block, pair: boolean) =>
+  pair
+    ? block.chapter
+      ? '46vh'
+      : '56vh'
+    : block.chapter
+      ? '62vh'
+      : '78vh';
 const next = nextSeriesLine(series);
 ---
 
@@ -51,25 +64,38 @@ const next = nextSeriesLine(series);
   <main id="main" class="series">
     <div class="sequence">
       {
-        blocks.map((block, i) =>
-          block.kind === 'chapter' ? (
-            <ChapterMark chapter={block.chapter} />
-          ) : block.frames.length === 2 ? (
+        blocks.map((block, i) => {
+          const pair = block.frames.length === 2;
+          const view = pair ? (
             <FramePair
               frames={block.frames as [Frame, Frame]}
               treatment={series.treatment}
-              eager={i === firstFrames}
+              eager={i === 0}
+              cap={capOf(block, true)}
               anchor
             />
           ) : (
             <FrameView
               frame={block.frames[0]}
               treatment={series.treatment}
-              eager={i === firstFrames}
+              eager={i === 0}
+              maxHeight={capOf(block, false)}
               anchor
             />
-          ),
-        )
+          );
+
+          // The city's name and its first photograph are one page: the frame
+          // inside is still what the scroll settles on, and the line simply
+          // rides above it.
+          return block.chapter ? (
+            <div class="opening">
+              <ChapterMark chapter={block.chapter} />
+              {view}
+            </div>
+          ) : (
+            view
+          );
+        })
       }
     </div>
 
@@ -96,20 +122,56 @@ const next = nextSeriesLine(series);
     padding: 120px var(--margin) 0;
   }
 
-  /* A chapter opens with a wider pause in front of it and a shorter one
-     behind: the city's name and its first photograph belong together. */
-  .sequence :global(.chapter) {
-    margin-top: 10vh;
-    margin-bottom: -8vh;
+  /* A city's name and its first photograph, held together as one page. */
+  .opening {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    width: 100%;
   }
 
-  .sequence :global(.chapter:first-child) {
+  /* A little further to travel into a new city than between two frames
+     of the same one. */
+  .opening + :global(*),
+  .sequence > .opening {
+    margin-top: 6vh;
+  }
+
+  .sequence > .opening:first-child {
     margin-top: 0;
   }
 
   /* Where a rail link lands with JavaScript off. */
   .sequence :global([data-frame]) {
     scroll-margin-top: calc(var(--series-header-h) + var(--safe-top) + 48px);
+  }
+
+  /* ── One photograph at a time ──────────────────────────────────
+     The page stops on each frame rather than drifting between them.
+     The scroll container is the document itself, so this has to reach
+     out of the component — it ships only with the series page, and the
+     padding holds the sticky header clear so a photograph settles in
+     the middle of the paper below it rather than under the bar. */
+  :global(html) {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: calc(var(--series-header-h) + var(--safe-top));
+  }
+
+  /* Every photograph is a stop, and so is the line out to the next series
+     — without that last one, mandatory snapping would hold the bottom of
+     the page permanently out of reach. */
+  .sequence :global(.frame),
+  .sequence :global(.pair),
+  .next-wrap {
+    scroll-snap-align: center;
+  }
+
+  /* An opening is one page, not two: the frame inside it is the stop, and
+     the chapter line rides above. Without this the page could settle on
+     the photograph alone and hide the name under the header. */
+  .opening :global(.chapter) {
+    scroll-snap-align: none;
   }
 
   .next-wrap {
@@ -151,9 +213,8 @@ const next = nextSeriesLine(series);
       padding-top: 72px;
     }
 
-    .sequence :global(.chapter) {
-      margin-top: 6vh;
-      margin-bottom: -6vh;
+    .opening {
+      gap: 18px;
     }
 
     .next-wrap {
@@ -164,15 +225,32 @@ const next = nextSeriesLine(series);
 </style>
 
 <script>
-  /** Puts an element in the middle of the paper below the sticky header. */
+  let releasing = 0;
+
+  /**
+   * Puts an element in the middle of the paper below the sticky header.
+   *
+   * Snapping has to be lifted while this runs. A smooth scroll that travels
+   * past other photographs gives the browser snap points on the way, and it
+   * will take one and abandon the rest of the journey — which is what made a
+   * jump from the margin to a distant city simply not arrive. Anything
+   * further than a couple of screens is not worth animating anyway: it is a
+   * long smear of photographs nobody asked to see.
+   */
   function centreOn(y: number) {
-    const header = document.querySelector<HTMLElement>('.series-header');
-    const top = header?.offsetHeight ?? 0;
+    const root = document.documentElement;
+    const top = document.querySelector<HTMLElement>('.series-header')?.offsetHeight ?? 0;
+    const target = y - (top + (window.innerHeight - top) / 2);
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({
-      top: y - (top + (window.innerHeight - top) / 2),
-      behavior: still ? 'auto' : 'smooth',
-    });
+    const far = Math.abs(target - window.scrollY) > window.innerHeight * 2;
+
+    root.style.scrollSnapType = 'none';
+    window.clearTimeout(releasing);
+    releasing = window.setTimeout(() => {
+      root.style.removeProperty('scroll-snap-type');
+    }, still || far ? 60 : 900);
+
+    window.scrollTo({ top: target, behavior: still || far ? 'auto' : 'smooth' });
   }
 
   const centreOf = (el: HTMLElement) => {
@@ -334,29 +412,117 @@ const next = nextSeriesLine(series);
     );
   }
 
-  // Left and right step through the sequence, a photograph at a time, like
-  // turning pages. Only the horizontal keys are taken: the wheel, the space
-  // bar and the up/down keys scroll exactly as the browser intended.
+  // ── Turning the pages ────────────────────────────────────────
+  // The CSS above stops the page on each photograph, and on touch and on a
+  // trackpad's momentum that is the whole job. A mouse wheel is another
+  // matter: a photograph is most of a screen tall, so a notch or two never
+  // travels past the halfway mark between two frames and the page simply
+  // springs back where it was — it reads as though the site is stuck. So the
+  // wheel is taken over here. Any gesture, however small, turns exactly one
+  // page, and the snapping underneath goes on handling everything else.
   function startPaging() {
     const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
+    const tail = document.querySelector<HTMLElement>('.next-wrap');
     if (frames.length === 0) return;
 
-    // Measured fresh on each press, because photographs finish loading and
-    // the page settles as you read. A side-by-side pair shares a vertical
+    /** The middle of the paper below the header: where a page comes to rest. */
+    function reading() {
+      const top = document.querySelector<HTMLElement>('.series-header')?.offsetHeight ?? 0;
+      return window.scrollY + top + (window.innerHeight - top) / 2;
+    }
+
+    // Measured fresh on each turn, because photographs finish loading and the
+    // page settles as you read. A side-by-side pair shares a vertical
     // position, so it counts as one page rather than two.
     function stops() {
-      const out: { el: HTMLElement; y: number }[] = [];
+      const out: number[] = [];
       for (const frame of frames) {
         const y = centreOf(frame);
         const last = out[out.length - 1];
-        if (last && Math.abs(last.y - y) < 8) continue;
-        out.push({ el: frame, y });
+        if (last !== undefined && Math.abs(last - y) < 8) continue;
+        out.push(y);
       }
       return out;
     }
 
+    const foot = () => document.documentElement.scrollHeight - window.innerHeight;
+    const atFoot = () => tail !== null && window.scrollY >= foot() - 2;
+
+    function turn(step: number) {
+      const pages = stops();
+      if (pages.length === 0) return;
+
+      // Where you are. The line out to the next series sits past the last
+      // photograph and cannot be centred — the page has nothing left to
+      // scroll — so it counts as one page beyond the end rather than as a
+      // position among them. Without that, stepping back from it would skip
+      // the last photograph.
+      let index = pages.length;
+      if (!atFoot()) {
+        const middle = reading();
+        let best = Infinity;
+        index = 0;
+        pages.forEach((y, i) => {
+          const distance = Math.abs(y - middle);
+          if (distance < best) {
+            best = distance;
+            index = i;
+          }
+        });
+      }
+
+      const wanted = index + step;
+      if (wanted < 0) return;
+
+      if (wanted >= pages.length) {
+        if (!tail || atFoot()) return;
+        // The foot is not a photograph, so it is not in `pages` — reach it
+        // through the same lifted-snap scroll everything else uses.
+        centreOn(foot() + window.innerHeight);
+        return;
+      }
+
+      centreOn(pages[wanted]);
+    }
+
+    let turning = false;
+    let quiet = 0;
+
+    function release() {
+      window.clearTimeout(quiet);
+      turning = false;
+    }
+
+    function onWheel(event: WheelEvent) {
+      // A pinch to zoom, and anything sideways, is not a page turn.
+      if (event.ctrlKey) return;
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+
+      if (!turning) {
+        turning = true;
+        turn(event.deltaY > 0 ? 1 : -1);
+      }
+
+      // One gesture, one photograph. A flick on a Mac trackpad does not end
+      // when your fingers leave it: the momentum keeps firing wheel events
+      // for a second or more afterwards, and anything that lets go of the
+      // page while that tail is still running turns three or four pages from
+      // a single swipe. So the release is pushed out by every event that
+      // arrives and only happens once the gesture has genuinely gone quiet.
+      window.clearTimeout(quiet);
+      quiet = window.setTimeout(release, 220);
+    }
+
+    // The arrows turn pages too, in both axes: left and up go back, right and
+    // down go on. Their native scroll is only a few dozen pixels, which the
+    // snapping would undo on the spot.
+    const forward = new Set(['ArrowRight', 'ArrowDown']);
+    const back = new Set(['ArrowLeft', 'ArrowUp']);
+
     function onKey(event: KeyboardEvent) {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      const on = forward.has(event.key);
+      if (!on && !back.has(event.key)) return;
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       // Not always an element — a keypress with nothing focused targets the
       // document itself, which has no closest().
@@ -368,32 +534,19 @@ const next = nextSeriesLine(series);
         return;
       }
 
-      const pages = stops();
-      if (pages.length === 0) return;
-
-      // Where you are: the photograph nearest the middle of the screen.
-      const middle = window.scrollY + window.innerHeight / 2;
-      let current = 0;
-      let best = Infinity;
-      pages.forEach((page, i) => {
-        const distance = Math.abs(page.y - middle);
-        if (distance < best) {
-          best = distance;
-          current = i;
-        }
-      });
-
-      const next = pages[current + (event.key === 'ArrowRight' ? 1 : -1)];
-      if (!next) return;
-
       event.preventDefault();
-      centreOn(next.y);
+      turn(on ? 1 : -1);
     }
 
+    window.addEventListener('wheel', onWheel, { passive: false });
     document.addEventListener('keydown', onKey);
     document.addEventListener(
       'astro:before-swap',
-      () => document.removeEventListener('keydown', onKey),
+      () => {
+        window.removeEventListener('wheel', onWheel);
+        document.removeEventListener('keydown', onKey);
+        release();
+      },
       { once: true },
     );
   }

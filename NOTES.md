@@ -412,11 +412,19 @@ and deriving chapters from `place` unconditionally (Japan's three cities
 interleave every other frame, which would have produced ten chapters for ten
 photographs).
 
-Each chapter is drawn as a hairline across the full measure, the city's
-characters at up to 150px in a 26% tint of the series accent, the Latin name
-under them, and the frame range pushed to the far edge of the measure. Type only
-— nothing is ever drawn over a photograph, which is the same rule the hover
-frame-number already follows.
+Each chapter is one line: a hairline across the full measure, then the city in
+its own script at 28px beside the name at 20px, with the frame range pushed to
+the far edge. Type only — nothing is ever drawn over a photograph, which is the
+same rule the hover frame-number already follows.
+
+It started far bigger — the characters at up to 150px, name and range stacked
+beneath — and Pedro cut it as too big and too disruptive. Small has a second
+benefit that the big version could not have had: the chapter line now sits
+directly above its city's first photograph and they share one screen, so
+arriving somewhere new costs no screen of its own. That is what the `.opening`
+wrapper is for, and why a photograph that opens a city is capped at 62vh
+(46vh for a pair) rather than 78vh — the shorter frame leaves exactly enough
+room above it for the line once the page has settled there.
 
 ### The margin — two attempts
 
@@ -465,6 +473,49 @@ briefly showing `KYOTO · 004 / 10` and flickering city names every other frame,
 which is why the place is gated on the chapter set rather than on `place`
 existing.
 
+## One photograph at a time
+
+Pedro asked for the page to stop on each photograph rather than scroll freely.
+`scroll-snap-type: y mandatory` on the document does most of it, with
+`scroll-padding-top` holding the sticky header clear so a frame settles in the
+middle of the paper below the bar rather than under it. The rules ship only
+with the series page — they are written as `:global(html)` inside its scoped
+`<style>`, so `/work`, `/about`, `/loose` and the full-screen view are
+untouched (confirmed in `dist`: only the two series pages link the stylesheet
+that carries them).
+
+Three things had to be solved on top of it.
+
+**A short wheel gesture did nothing at all.** A photograph is most of a screen
+tall, so consecutive snap points are roughly a screen apart, and a mouse-wheel
+notch of ~300px never passes the halfway mark — the page springs straight back.
+Measured: three notches moved it zero pixels. So the wheel is taken over in JS.
+Any gesture, in any direction, turns exactly one page. The snapping underneath
+still handles touch on its own.
+
+**One trackpad swipe turned three or four pages.** A flick on a Mac does not end
+when your fingers leave the trackpad: momentum keeps firing wheel events for a
+second or more. The first attempt released the page after a fixed 650ms, which
+was inside that tail. The release is now pushed out by every event that arrives
+and only fires after 220ms of genuine silence, so a swipe with an 1800ms tail
+turns exactly one page. Verified by dispatching synthetic decaying-delta bursts.
+
+**A jump from the margin to a distant city did not arrive.** A smooth scroll
+that travels past other photographs hands the browser snap points on the way,
+and it takes one and abandons the rest of the journey. `centreOn` now lifts
+`scroll-snap-type` for the duration of the move and restores it after, and
+anything further than two screens is jumped instantly rather than animated —
+a long smooth scroll through fifteen photographs is a smear nobody asked for.
+
+Two smaller consequences. The arrows now turn pages on both axes (up/down as
+well as left/right), because their native scroll is a few dozen pixels that the
+snapping would undo on the spot — the old comment about leaving the vertical
+keys to the browser no longer applies. And the line out to the next series
+needed a stop of its own (`scroll-snap-align: end`), or mandatory snapping
+would have held the foot of the page permanently out of reach; it is handled as
+one page *past* the last photograph rather than as a position among them, so
+stepping back from it does not skip frame 37.
+
 ## The bug worth remembering
 
 The counter was driven purely by an IntersectionObserver with a
@@ -481,12 +532,12 @@ live updating; `sync()` only corrects it.
 
 ## Known, not fixed
 
-Holding or hammering the arrow keys advances one frame, not one per press: each
-press measures "where you are" from the current scroll position, which during a
-`behavior: 'smooth'` animation has not arrived yet. Pre-existing, unchanged by
-this work, and invisible at a reading pace — three paced presses step three
-pages correctly. Fixing it means tracking a target index rather than reading the
-scroll position.
+Hammering the arrow keys faster than the smooth scroll can land still advances
+one frame rather than one per press: each press measures "where you are" from
+the current scroll position, which mid-animation has not arrived yet. Invisible
+at a reading pace. Fixing it means tracking a target index rather than reading
+the scroll position — worth doing if it ever becomes annoying, since the pager
+now owns both axes.
 
 ## Not built
 

@@ -1,9 +1,13 @@
 ---
 // ─────────────────────────────────────────────────────────────
-//  The page a photobook gives you when the journey moves on:
-//  the city's own characters, large and pale, the name under
-//  them, and the frames it covers set out to the right.
-//  Nothing here is a link. It is a breath, not a control.
+//  The journey moving on, said in one line: a rule across the
+//  measure, the city in its own script and in ours, and the
+//  frames it covers out at the far edge.
+//
+//  It is deliberately small. It sits just above the first
+//  photograph of the city rather than taking a screen of its
+//  own, so arriving somewhere new costs you nothing — you read
+//  the name and the picture together.
 // ─────────────────────────────────────────────────────────────
 import type { Chapter } from '../data/catalog';
 
@@ -22,12 +26,11 @@ const { chapter } = Astro.props;
 >
   <span class="rule" aria-hidden="true"></span>
 
-  {chapter.local && (
-    <span class="local" aria-hidden="true">{chapter.local}</span>
-  )}
-
   <div class="line">
-    <h2 class="name">{chapter.name}</h2>
+    <h2 class="name">
+      {chapter.local && <span class="local" aria-hidden="true">{chapter.local}</span>}
+      {chapter.name}
+    </h2>
     <p class="mono range">{chapter.rangeLine}</p>
   </div>
 </section>
@@ -38,9 +41,6 @@ const { chapter } = Astro.props;
        their own width. The rule is what makes the break read as a break. */
     align-self: stretch;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
   }
 
   .rule {
@@ -48,21 +48,7 @@ const { chapter } = Astro.props;
     width: 100%;
     height: 1px;
     background: var(--hairline);
-    margin-bottom: 28px;
-  }
-
-  /* The one loud mark on the page — and it is still only a tint of the
-     series accent on paper, never ink. */
-  .local {
-    display: block;
-    font-family: var(--sans);
-    font-weight: 400;
-    font-size: clamp(72px, 11vw, 150px);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
-    color: color-mix(in srgb, var(--accent) 26%, transparent);
-    margin-bottom: 18px;
-    user-select: none;
+    margin-bottom: 12px;
   }
 
   .line {
@@ -73,11 +59,23 @@ const { chapter } = Astro.props;
   }
 
   .name {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
     font-family: var(--sans);
     font-weight: 400;
-    font-size: 38px;
-    line-height: 1.1;
+    font-size: 20px;
+    line-height: 1.2;
     color: var(--ink);
+  }
+
+  /* Small enough now to carry more of the accent without shouting. */
+  .local {
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, var(--accent) 65%, transparent);
+    user-select: none;
   }
 
   /* Pushed to the far edge of the measure, so the two ends of the line hold
@@ -88,32 +86,17 @@ const { chapter } = Astro.props;
   }
 
   @media (max-width: 768px) {
-    .chapter {
-      padding-top: 0;
-    }
-
     .rule {
-      margin-bottom: 20px;
-    }
-
-    .local {
-      font-size: clamp(56px, 20vw, 96px);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .name {
-      font-size: 26px;
+      font-size: 16px;
+      gap: 9px;
     }
 
-    /* Not enough measure to hold both ends apart on a phone. */
-    .line {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
-    }
-
-    .range {
-      margin-left: 0;
+    .local {
+      font-size: 22px;
     }
   }
 </style>
