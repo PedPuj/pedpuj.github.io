@@ -17,7 +17,13 @@ const items = [
   data-nav
   transition:persist={onPhoto ? 'nav-photo' : 'nav-paper'}
 >
-  {items.map((item) => <a href={item.href}>{item.label}</a>)}
+  {
+    items.map((item) => (
+      <a href={item.href} data-astro-prefetch="hover">
+        {item.label}
+      </a>
+    ))
+  }
   {!onPhoto && <span class="underline" data-underline aria-hidden="true"></span>}
 </nav>
 
@@ -39,14 +45,53 @@ const items = [
   }
 
   .nav a:hover,
+  .nav a:focus-visible,
   .nav a[data-active] {
     color: var(--ink);
   }
 
-  /* Homepage: every item at full paper colour, no active state. */
-  .on-photo a,
-  .on-photo a:hover {
+  /* Hovering draws a 1px rule beneath the item, left to right, in the accent
+     — the same gesture the series index rows and the next-series line use,
+     and the same mark the active item already wears. The active item is
+     skipped, since it has one of its own that slides. */
+  .nav a {
+    position: relative;
+  }
+
+  .nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 200ms ease;
+  }
+
+  .nav a:hover::after,
+  .nav a:focus-visible::after {
+    width: 100%;
+  }
+
+  .nav a[data-active]::after {
+    content: none;
+  }
+
+  /* Over a photograph, in the colours that ground allows: the items rest a
+     little under full paper and the rule is drawn in paper too, since the
+     accent is ink here and would vanish into the photograph. */
+  .on-photo a {
+    color: color-mix(in srgb, var(--paper) 76%, transparent);
+  }
+
+  .on-photo a:hover,
+  .on-photo a:focus-visible {
     color: var(--paper);
+  }
+
+  .on-photo a::after {
+    background: var(--paper);
   }
 
   .underline {
@@ -89,24 +134,30 @@ const items = [
 
     if (!bar) return;
 
-    // Never animate the very first placement — only later moves slide.
+    // The very first placement has nowhere to slide from, so the rule is put
+    // in position silently and then faded in. Arriving from the homepage —
+    // which builds a fresh nav, and so always lands here — therefore takes
+    // the same 200ms as sliding between two paper pages, instead of popping.
     const first = nav.dataset.painted !== 'true';
-    if (first) bar.style.transition = 'none';
+    if (first) {
+      bar.style.transition = 'none';
+      bar.style.opacity = '0';
+    }
 
     if (active) {
       bar.style.left = `${active.offsetLeft}px`;
       bar.style.width = `${active.offsetWidth}px`;
-      bar.style.opacity = '1';
     } else {
       bar.style.width = '0px';
-      bar.style.opacity = '0';
     }
 
     if (first) {
-      void bar.offsetWidth; // flush, so the reset below doesn't animate
+      void bar.offsetWidth; // flush, so the fade below actually animates
       bar.style.transition = '';
       nav.dataset.painted = 'true';
     }
+
+    bar.style.opacity = active ? '1' : '0';
   }
 
   function paintAll() {
