@@ -14,10 +14,12 @@ import Nav from './Nav.astro';
     top: 0;
     z-index: 10;
     display: flex;
-    align-items: center;
+    /* Baseline, not centre: the wordmark and the nav are different sizes and
+       must sit on one line — and it must be the same line the homepage uses. */
+    align-items: baseline;
     justify-content: space-between;
     height: var(--header-h);
-    padding: 0 var(--margin);
+    padding: var(--chrome-top) var(--margin) 0;
     background: var(--ground);
   }
 </style>

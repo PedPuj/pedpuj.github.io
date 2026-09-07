@@ -22,9 +22,9 @@ const start = counterText(1, series.frameCount);
     top: 0;
     z-index: 10;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     height: var(--series-header-h);
-    padding: 0 var(--margin);
+    padding: var(--chrome-top) var(--margin) 0;
     /* Translucent paper. No border, no shadow, no solid bar. */
     background: color-mix(in srgb, var(--ground) 92%, transparent);
     -webkit-backdrop-filter: none;
@@ -42,6 +42,8 @@ const start = counterText(1, series.frameCount);
   .counter {
     margin-left: auto;
     font-size: 12px;
+    /* Overrides .mono's 1.7 so the counter shares the wordmark's baseline. */
+    line-height: 1;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
     transition: color 200ms ease;

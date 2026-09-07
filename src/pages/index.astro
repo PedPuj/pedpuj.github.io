@@ -88,7 +88,7 @@ const heroSizes = `(orientation: portrait) ${Math.round(heroRatio * 100)}vh, 100
 
   .chrome-top {
     position: absolute;
-    top: 34px;
+    top: var(--chrome-top);
     left: var(--margin);
     right: var(--margin);
     display: flex;
@@ -106,9 +106,6 @@ const heroSizes = `(orientation: portrait) ${Math.round(heroRatio * 100)}vh, 100
   @media (max-width: 768px) {
     .scrim {
       height: 140px;
-    }
-    .chrome-top {
-      top: 26px;
     }
     .chrome-bottom {
       bottom: 26px;

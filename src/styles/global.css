@@ -24,6 +24,11 @@
   --gutter: 24px;
   --header-h: 96px;
   --series-header-h: 72px;
+  /* The wordmark's top edge, measured from the top of the viewport. It is the
+     same on every page — homepage, series index and series page — so the
+     chrome never jumps as you move between them, even though the bars
+     underneath it are different heights. */
+  --chrome-top: 34px;
 
   /* Type */
   --sans: 'Switzer', ui-sans-serif, -apple-system, 'Helvetica Neue', Arial,
@@ -38,6 +43,7 @@
     --margin: 20px;
     --header-h: 72px;
     --series-header-h: 64px;
+    --chrome-top: 26px;
   }
 }
 
