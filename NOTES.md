@@ -418,24 +418,38 @@ under them, and the frame range pushed to the far edge of the measure. Type only
 — nothing is ever drawn over a photograph, which is the same rule the hover
 frame-number already follows.
 
-### The rail
+### The margin — two attempts
 
-A fixed spine in the left margin: one mark per frame, 15px wide for a landscape
-and 8px for a portrait, so the rail literally draws the shape of the edit.
-Gathered into five clusters, one per city. The current frame's mark takes the
-accent and reaches further out; the city you are in lifts out of the hairline.
-Every mark is a real `<a>` to a real anchor, so it works with JavaScript off;
-with it, the click centres the frame instead of dropping it under the header.
+**What is there now:** five words. The city names down the left margin, set on
+their end (`writing-mode: vertical-rl`), 10px mono with wide tracking. The city
+you are reading is `--ink`; the other four sit at 20% of it. Each is a real
+`<a>` to a real anchor, so it works with JavaScript off; with it, the click
+centres the frame instead of dropping it under the header. No line, no marks,
+no ornament — the counter in the corner already says how far in you are, so the
+margin only has to say where.
 
-City names are set **vertically** (`writing-mode: vertical-rl`) and appear on
-hover. They started horizontal and had to move: at 11px they ran from x=49 to
-x=100, and a width-limited photograph starts at x=64, so a hovered label sat on
-top of the picture. Vertical keeps them inside the 64px margin at every window
-size. The gap between clusters is 20px rather than the 8px pitch because a short
-cluster's name, stood on its end, is taller than the cluster itself — Hangzhou's
-five marks are 40px and its name is 50px.
+Positioned at `left: 23px` so the 17px column of type sits centred in the 64px
+margin: as much paper between the names and a full-measure photograph (which
+starts at exactly 64px) as there is to the page edge. Vertical, not horizontal,
+for that reason — an 11px horizontal "HANGZHOU" runs to x=100 and sits on top
+of the picture.
 
 Hidden below 1025px wide or 620px tall: there is no margin to stand in.
+
+**What was there first, and why it went:** a contact-sheet spine — one mark per
+frame, 15px wide for a landscape and 8px for a portrait, so the rail drew the
+shape of the edit, gathered into five clusters with the current frame's mark in
+the accent. Pedro rejected it as too busy, and he was right: 37 marks is a lot
+of furniture for a site whose whole character is restraint, and a tick-strip
+reads as a widget bolted on rather than as part of the design. Worth remembering
+if the impulse to visualise the sequence comes back — the information was
+genuinely useful, the ornament was not.
+
+Two other directions were offered at the same time and not taken: a single 1px
+hairline broken into five segments proportional to each city's frame count,
+filling with the accent as you read; and a full-width hairline under the sticky
+header with four notches for the cities (the only one that would also have
+worked on a phone).
 
 ### The paper
 

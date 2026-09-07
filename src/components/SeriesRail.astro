@@ -1,11 +1,14 @@
 ---
 // ─────────────────────────────────────────────────────────────
-//  The edge of a contact sheet, stood on its end in the left
-//  margin: one mark per photograph, wide for a landscape and
-//  narrow for a portrait, gathered into the cities of the
-//  journey. It shows the shape of the whole series at a glance,
-//  says where you are in it, and takes you anywhere in it.
-//  Desktop only — a phone has no margin to spare.
+//  The itinerary, in the left margin: five words, set on their
+//  end. The city you are reading is inked and the rest are a
+//  whisper, so the whole route is there without anything on the
+//  page competing with a photograph. Each one is a link to where
+//  that city begins.
+//
+//  No line, no marks, no ornament — the counter in the corner
+//  already says how far in you are, so this only has to say
+//  where. Desktop only: a phone has no margin to spare.
 // ─────────────────────────────────────────────────────────────
 import type { Series } from '../data/catalog';
 
@@ -15,30 +18,17 @@ interface Props {
 const { series } = Astro.props;
 ---
 
-<nav class="rail" aria-label={`Frames in ${series.title}`}>
+<nav class="rail" aria-label={`Cities in ${series.title}`}>
   {
     series.chapters.map((chapter) => (
-      <div class="group" data-group={chapter.index} data-place={chapter.place}>
-        <span class="label mono" aria-hidden="true">
-          {chapter.name}
-        </span>
-        <ul>
-          {chapter.frames.map((frame) => (
-            <li>
-              <a
-                class="tick"
-                href={`#f${frame.index}`}
-                data-tick={frame.index}
-                style={`--w: ${frame.orientation === 'v' ? 8 : 15}px`}
-              >
-                <span class="sr">
-                  {chapter.name} — frame {frame.index}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <a
+        class="city mono"
+        href={`#f${chapter.from}`}
+        data-place={chapter.place}
+        data-goto={chapter.from}
+      >
+        {chapter.name}
+      </a>
     ))
   }
 </nav>
@@ -46,98 +36,38 @@ const { series } = Astro.props;
 <style>
   .rail {
     position: fixed;
-    left: calc(var(--safe-left) + 22px);
+    /* Centred in the 64px margin, so there is as much paper between the
+       names and a full-measure photograph as there is to the page edge. */
+    left: calc(var(--safe-left) + 23px);
     top: 50%;
     transform: translateY(-50%);
     z-index: 9;
-    /* Photographs begin at --margin, so nothing here ever crosses one. */
-    width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* Even air between them. Spacing them by how many frames each city
+       holds would only be the old rail again, in another costume. */
+    gap: 26px;
   }
 
-  .rail ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .group {
-    position: relative;
-  }
-
-  /* A gap of paper between cities: the five clusters are the journey. It is
-     wider than it looks like it needs to be because a short city's name,
-     stood on its end, runs past the bottom of its own cluster. */
-  .group + .group {
-    margin-top: 20px;
-  }
-
-  .tick {
-    display: block;
-    /* 2px of mark and 6px of air = a pitch of 8px, so all 37 stand in
-       352px and fit any window tall enough to be worth the rail. */
-    padding: 3px 0;
-    outline-offset: 2px;
-  }
-
-  .tick::before {
-    content: '';
-    display: block;
-    width: var(--w);
-    height: 2px;
-    background: var(--hairline);
-    transition:
-      width 200ms ease,
-      background-color 200ms ease;
-  }
-
-  /* The city you are reading lifts out of the hairline. */
-  .group.is-current .tick::before {
-    background: color-mix(in srgb, var(--ink) 32%, transparent);
-  }
-
-  /* And the frame itself takes the accent and reaches further out. */
-  .tick.is-current::before {
-    background: var(--accent);
-    width: calc(var(--w) + 9px);
-  }
-
-  .tick:hover::before,
-  .tick:focus-visible::before {
-    background: var(--ink);
-  }
-
-  /* The names stay off the paper until you go looking for them, and they
-     run downwards beside their cluster — set on their end like the spine of
-     a book, and, more to the point, narrow enough to stay inside the margin.
-     Anything horizontal here would reach across onto a wide photograph. */
-  .label {
-    position: absolute;
-    left: 24px;
-    top: 0;
+  /* Read downwards, like the spine of a book — and, more to the point,
+     narrow enough that nothing ever reaches across onto a photograph. */
+  .city {
     writing-mode: vertical-rl;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-    color: var(--ink-2);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 200ms ease;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--ink) 20%, transparent);
+    transition: color 250ms ease;
+    outline-offset: 3px;
   }
 
-  .rail:hover .label,
-  .rail:focus-within .label {
-    opacity: 1;
+  .city.is-current {
+    color: var(--ink);
   }
 
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .city:hover,
+  .city:focus-visible {
+    color: var(--ink);
   }
 
   /* No margin to stand in, or no height to stand up in. */

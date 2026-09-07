@@ -222,28 +222,18 @@ const next = nextSeriesLine(series);
         root.style.setProperty('--ground', (value && grounds.get(value)) || base);
       }
 
-      for (const group of document.querySelectorAll<HTMLElement>('.rail .group')) {
-        group.classList.toggle('is-current', group.dataset.place === value);
+      for (const city of document.querySelectorAll<HTMLElement>('.rail [data-place]')) {
+        const here = city.dataset.place === value;
+        city.classList.toggle('is-current', here);
+        if (here) city.setAttribute('aria-current', 'true');
+        else city.removeAttribute('aria-current');
       }
-    }
-
-    let markedTick: HTMLElement | null = null;
-
-    function markTick(index: string) {
-      const tick = document.querySelector<HTMLElement>(`[data-tick="${index}"]`);
-      if (tick === markedTick) return;
-      markedTick?.classList.remove('is-current');
-      tick?.classList.add('is-current');
-      markedTick = tick ?? null;
     }
 
     function show(el: HTMLElement | null | undefined) {
       if (!el) return;
       const index = el.dataset.index;
-      if (index) {
-        number.textContent = `${pad(index)} / ${total}`;
-        markTick(index);
-      }
+      if (index) number.textContent = `${pad(index)} / ${total}`;
       const place = el.dataset.place;
       showPlace(place && chaptered.has(place) ? place : undefined);
     }
@@ -314,9 +304,9 @@ const next = nextSeriesLine(series);
     );
   }
 
-  // The rail in the left margin: every mark is a real link to a real anchor,
-  // so it works without this. With it, the frame is centred rather than
-  // dropped under the header, and the page glides instead of jumping.
+  // The itinerary in the left margin: every city is a real link to a real
+  // anchor, so it works without this. With it, the frame is centred rather
+  // than dropped under the header, and the page glides instead of jumping.
   function startRail() {
     const rail = document.querySelector<HTMLElement>('.rail');
     if (!rail) return;
@@ -324,11 +314,11 @@ const next = nextSeriesLine(series);
     function onClick(event: MouseEvent) {
       const target = event.target;
       if (!(target instanceof Element)) return;
-      const tick = target.closest<HTMLElement>('[data-tick]');
-      if (!tick || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      const city = target.closest<HTMLElement>('[data-goto]');
+      if (!city || event.metaKey || event.ctrlKey || event.shiftKey) return;
 
       const frame = document.querySelector<HTMLElement>(
-        `[data-frame][data-index="${tick.dataset.tick}"]`,
+        `[data-frame][data-index="${city.dataset.goto}"]`,
       );
       if (!frame) return;
 
