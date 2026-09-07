@@ -23,8 +23,10 @@ const start = counterText(1, series.frameCount);
     z-index: 10;
     display: flex;
     align-items: baseline;
-    height: var(--series-header-h);
-    padding: var(--chrome-top) var(--margin) 0;
+    height: calc(var(--series-header-h) + var(--safe-top));
+    padding: calc(var(--chrome-top) + var(--safe-top))
+      calc(var(--margin) + var(--safe-right)) 0
+      calc(var(--margin) + var(--safe-left));
     /* Translucent paper. No border, no shadow, no solid bar. */
     background: color-mix(in srgb, var(--ground) 92%, transparent);
     -webkit-backdrop-filter: none;

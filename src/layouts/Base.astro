@@ -29,7 +29,14 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
 <html lang="en" style={vars}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- viewport-fit=cover: without it iOS letterboxes the whole page inside
+         the safe area, so a full-bleed photograph stops short of the Dynamic
+         Island and the bottom edge. The chrome keeps clear on its own, via
+         the --safe-* tokens. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />

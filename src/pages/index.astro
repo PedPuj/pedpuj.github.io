@@ -80,19 +80,21 @@ const heroSizes = `(orientation: portrait) ${Math.round(heroRatio * 100)}vh, 100
 
   .scrim-top {
     top: 0;
+    height: calc(180px + var(--safe-top));
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), transparent);
   }
 
   .scrim-bottom {
     bottom: 0;
+    height: calc(180px + var(--safe-bottom));
     background: linear-gradient(0deg, rgba(0, 0, 0, 0.25), transparent);
   }
 
   .chrome-top {
     position: absolute;
-    top: var(--chrome-top);
-    left: var(--margin);
-    right: var(--margin);
+    top: calc(var(--chrome-top) + var(--safe-top));
+    left: calc(var(--margin) + var(--safe-left));
+    right: calc(var(--margin) + var(--safe-right));
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -100,17 +102,18 @@ const heroSizes = `(orientation: portrait) ${Math.round(heroRatio * 100)}vh, 100
 
   .chrome-bottom {
     position: absolute;
-    bottom: 34px;
-    left: var(--margin);
+    bottom: calc(var(--chrome-bottom) + var(--safe-bottom));
+    left: calc(var(--margin) + var(--safe-left));
     color: var(--paper);
   }
 
   @media (max-width: 768px) {
-    .scrim {
-      height: 140px;
+    .scrim-top {
+      height: calc(140px + var(--safe-top));
     }
-    .chrome-bottom {
-      bottom: 26px;
+
+    .scrim-bottom {
+      height: calc(140px + var(--safe-bottom));
     }
   }
 </style>

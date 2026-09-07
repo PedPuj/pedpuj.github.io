@@ -18,8 +18,10 @@ import Nav from './Nav.astro';
        must sit on one line — and it must be the same line the homepage uses. */
     align-items: baseline;
     justify-content: space-between;
-    height: var(--header-h);
-    padding: var(--chrome-top) var(--margin) 0;
+    height: calc(var(--header-h) + var(--safe-top));
+    padding: calc(var(--chrome-top) + var(--safe-top))
+      calc(var(--margin) + var(--safe-right)) 0
+      calc(var(--margin) + var(--safe-left));
     background: var(--ground);
   }
 </style>

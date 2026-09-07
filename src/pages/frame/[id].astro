@@ -157,8 +157,8 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
 
   .counter {
     position: absolute;
-    top: 28px;
-    right: 76px;
+    top: calc(28px + var(--safe-top));
+    right: calc(76px + var(--safe-right));
     font-size: 12px;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
@@ -166,8 +166,8 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
 
   .close {
     position: absolute;
-    top: 26px;
-    right: 32px;
+    top: calc(26px + var(--safe-top));
+    right: calc(32px + var(--safe-right));
     font-size: 15px;
     line-height: 1;
     color: var(--lightbox-meta);
@@ -204,19 +204,19 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
   .prev {
     left: 0;
     justify-content: flex-start;
-    padding-left: 28px;
+    padding-left: calc(28px + var(--safe-left));
   }
 
   .next {
     right: 0;
     justify-content: flex-end;
-    padding-right: 28px;
+    padding-right: calc(28px + var(--safe-right));
   }
 
   .meta {
     position: absolute;
-    bottom: 34px;
-    left: var(--margin);
+    bottom: calc(var(--chrome-bottom) + var(--safe-bottom));
+    left: calc(var(--margin) + var(--safe-left));
     color: var(--lightbox-meta);
   }
 
@@ -230,19 +230,18 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     }
 
     .counter {
-      top: 24px;
-      right: 60px;
+      top: calc(24px + var(--safe-top));
+      right: calc(60px + var(--safe-right));
       font-size: 11px;
     }
 
     .close {
-      top: 22px;
-      right: 20px;
+      top: calc(22px + var(--safe-top));
+      right: calc(20px + var(--safe-right));
     }
 
     .meta {
-      bottom: 26px;
-      right: var(--margin);
+      right: calc(var(--margin) + var(--safe-right));
     }
   }
 </style>

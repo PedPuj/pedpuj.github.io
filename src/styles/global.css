@@ -29,6 +29,16 @@
      chrome never jumps as you move between them, even though the bars
      underneath it are different heights. */
   --chrome-top: 34px;
+  --chrome-bottom: 34px;
+
+  /* What the hardware takes: the Dynamic Island, the home indicator, a notch
+     at the side in landscape. Zero on everything else. The photographs draw
+     underneath them — that is the point of viewport-fit=cover — and only the
+     chrome is held clear. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 
   /* Type */
   --sans: 'Switzer', ui-sans-serif, -apple-system, 'Helvetica Neue', Arial,
@@ -44,6 +54,7 @@
     --header-h: 72px;
     --series-header-h: 64px;
     --chrome-top: 26px;
+    --chrome-bottom: 26px;
   }
 }
 
