@@ -660,3 +660,45 @@ to* — so swiping through the sequence would have closed it on arrival. The
 timestamp of the last swipe therefore lives outside `setupLightbox`, at module
 scope, because the function has already been torn down and set up again by the
 time the click arrives.
+
+## The typefaces are the site's own now (7 Sep 2026)
+
+Pedro, still: "it loads the web and then like loads it again on load and on
+flicker."
+
+First, what it was *not*. On the live site a walk through every route —
+home → work → China → a frame → back → Japan — produces **zero console errors
+and exactly one navigation entry**, so nothing is doing a real reload. The
+`InvalidStateError: Transition was aborted` seen while testing comes from the
+**Astro dev toolbar**: it carries a `view-transition-name` on a zero-sized
+element, which Chrome refuses to capture. Dev only; it does not ship. Worth
+knowing before chasing it again.
+
+What is left is the fonts. Switzer came from `api.fontshare.com` and IBM Plex
+Mono from `fonts.googleapis.com`, as two **render-blocking** stylesheets in the
+head. Nothing is drawn until each has been resolved, connected to, fetched and
+parsed — measured at 215ms and 118ms from a desktop with warm DNS, and far
+worse from a phone on mobile data with nothing cached. Only *then* does the
+font file itself start downloading from a third and fourth origin, and with
+`display=swap` the page meanwhile renders in the system fonts and reshapes
+itself when they arrive. Text appearing, then changing shape, is exactly what
+"it loads and then loads again" describes.
+
+All four faces are now in `public/fonts/` — 64KB the lot — declared in
+global.css and preloaded in the layout, so they come down the connection that
+is already open for the page. There are now **no external requests at all** on
+any page (verified: `performance.getEntriesByType('resource')` filtered to
+non-local returns an empty array).
+
+Licences are in `public/fonts/LICENSES.md`. Switzer is ITF Free Font Licence
+and IBM Plex Mono is SIL OFL 1.1; both permit self-hosting. The mono is subset
+to Latin and Latin Extended, as Google serves it, and the Extended cut is
+deliberately not preloaded — nothing on the site reaches it yet.
+
+Note that the Chinese characters in the chapter marks are in neither typeface
+and never were: they fall back to the system CJK face, which is the intention.
+
+**Unconfirmed.** This could not be reproduced locally — every cache here is
+warm and the connection is fast, and with everything cached the page paints
+complete on the first frame. It is the strongest remaining candidate rather
+than a proven diagnosis, and wants confirming on Pedro's phone.
