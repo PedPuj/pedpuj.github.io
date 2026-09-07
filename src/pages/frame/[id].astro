@@ -17,6 +17,15 @@ const backHref = series ? series.href : '/loose/';
 const prevHref = frame.prev ? `/frame/${frame.prev}/` : null;
 const nextHref = frame.next ? `/frame/${frame.next}/` : null;
 const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`;
+
+// The photograph is capped by HEIGHT, so its slot width is that cap times the
+// aspect ratio. Both the CSS and the `sizes` hint below need to know it.
+const ratio = frame.image
+  ? frame.image.width / frame.image.height
+  : frame.orientation === 'v'
+    ? 2 / 3
+    : 3 / 2;
+const slotWidth = `${Math.round(88 * ratio)}vh`;
 ---
 
 <Base title={title} ground="#141210" accent={accent}>
@@ -28,14 +37,14 @@ const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`
     data-next={nextHref}
     data-back={backHref}
   >
-    <div class="stage">
+    <div class="stage" style={`--ar: ${ratio}`}>
       {
         frame.image ? (
           <Image
             src={frame.image}
             alt={frame.slot}
             widths={[800, 1400, 2048]}
-            sizes="88vh"
+            sizes={`(max-width: 768px) 100vw, ${slotWidth}`}
             loading="eager"
             data-fade
             transition:name={frame.id}
@@ -76,17 +85,19 @@ const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`
   }
 
   .stage {
+    --cap: 88vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Definite width, so the layout box comes from the height cap and the real
+       proportions — not from whichever srcset rendition the browser picked. */
+    width: min(calc(100vw - var(--margin) * 2), calc(var(--cap) * var(--ar)));
   }
 
   .stage :global(img) {
-    max-height: 88vh;
-    max-width: calc(100vw - var(--margin) * 2);
-    width: auto;
+    display: block;
+    width: 100%;
     height: auto;
-    object-fit: contain;
     opacity: 0;
     transition: opacity 400ms ease;
   }
@@ -97,8 +108,8 @@ const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`
 
   .slot {
     display: block;
-    width: min(calc(100vw - var(--margin) * 2), 132vh);
-    aspect-ratio: 3 / 2;
+    width: 100%;
+    aspect-ratio: var(--ar);
     background: #201d1a;
   }
 
@@ -176,8 +187,8 @@ const title = series ? `${series.title} ${frame.index}` : `Loose ${frame.index}`
       display: none;
     }
 
-    .stage :global(img) {
-      max-height: 74svh;
+    .stage {
+      --cap: 74svh;
     }
 
     .counter {
