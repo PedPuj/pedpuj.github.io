@@ -56,32 +56,11 @@ export interface SeriesInput {
   frames: FrameInput[];
 }
 
+// The order here is the order the series appear on /work, and the first one
+// is the site's lead series. Workers was taken out on 7 Sep 2026 until there
+// are photographs for it; src/images/workers/ is still there, so bringing it
+// back means adding its block below again and pointing Japan's `next` at it.
 export const series: SeriesInput[] = [
-  {
-    slug: 'workers',
-    title: 'Workers',
-    places: 'SEVILLA & ELSEWHERE',
-    year: 2025,
-    note: 'BLACK AND WHITE. PEOPLE AT WORK.',
-    accent: '#3A3733',
-    ground: '#F5F2EC',
-    counterColor: '#3A3733',
-    treatment: 'mount',
-    cover: { file: 'cover.jpg', slot: 'Workers cover — apron, wide horizontal, b&w' },
-    next: 'china',
-    frames: [
-      { file: 'workers-01.jpg', slot: 'Butcher behind the counter — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-02.jpg', slot: 'Hands, flour, bakery bench — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025, pair: true },
-      { file: 'workers-03.jpg', slot: 'Apron detail, narrow — vertical', orientation: 'v', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-04.jpg', slot: 'Man in overalls in a doorway — vertical', orientation: 'v', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-05.jpg', slot: 'Fish market, early morning — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-06.jpg', slot: 'Barber mid-cut — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025, pair: true },
-      { file: 'workers-07.jpg', slot: 'Broom, wet pavement — vertical', orientation: 'v', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-08.jpg', slot: 'Scaffolding, two men talking — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-09.jpg', slot: 'Waiter on a cigarette break — vertical', orientation: 'v', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-      { file: 'workers-10.jpg', slot: 'Empty stall at closing time — horizontal', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-    ],
-  },
   {
     slug: 'china',
     title: 'China',
@@ -152,7 +131,7 @@ export const series: SeriesInput[] = [
     counterColor: '#8C877E',
     treatment: 'bare',
     cover: { file: 'cover.jpg', slot: 'Japan cover — quiet street, wide horizontal' },
-    next: 'workers',
+    next: 'china',
     frames: [
       { file: 'japan-01.jpg', slot: 'Commuters, Osaka — horizontal, Gold 200', orientation: 'h', film: 'KODAK GOLD 200', place: 'OSAKA', year: 2025 },
       { file: 'japan-02.jpg', slot: 'Vending machines at night — vertical', orientation: 'v', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025, pair: true },
