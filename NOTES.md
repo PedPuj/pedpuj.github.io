@@ -495,10 +495,35 @@ still handles touch on its own.
 
 **One trackpad swipe turned three or four pages.** A flick on a Mac does not end
 when your fingers leave the trackpad: momentum keeps firing wheel events for a
-second or more. The first attempt released the page after a fixed 650ms, which
-was inside that tail. The release is now pushed out by every event that arrives
-and only fires after 220ms of genuine silence, so a swipe with an 1800ms tail
-turns exactly one page. Verified by dispatching synthetic decaying-delta bursts.
+second or more. Two attempts before this landed:
+
+1. Release the page after a fixed 650ms — which is *inside* the tail, so the
+   tail turned two or three more pages. This is the bug Pedro reported.
+2. Release only after 220ms of genuine silence. Correct — one swipe, one page,
+   even with an 1800ms tail — but it means being ignored for the whole length
+   of the momentum, and Pedro reported *that* as the page getting stuck.
+
+What works is not waiting at all. Momentum has exactly one property that
+distinguishes it from a hand: **it only ever decays.** So a delta meaningfully
+larger than the one before it (`delta > previous * 1.15 + 1`, the margin being
+there because momentum does not decay perfectly smoothly) means fingers are
+back on the glass and a new page is wanted. A gesture pushes several growing
+events before it peaks, so a 400ms cooldown — about one glide — keeps that to
+one page. Gestures are dropped, never queued. A short silence (120ms) resets
+`previous` to zero so the next gesture, however gentle, reads as new.
+
+The result: a swipe with a 1.5s tail turns one page; a fresh swipe *during*
+that tail turns immediately rather than being swallowed; five swipes in a row
+turn five pages. All verified with synthetic decaying-delta bursts.
+
+**Every stop settled, paused, then shifted the photograph down.** Frames carried
+`scroll-margin-top` (header height + 48px), added as the landing point for a
+rail link with JavaScript off. But scroll-margin *grows the box the browser
+snaps to* — a margin at the top moved the snap centre up by half of it, so the
+photograph came to rest ~60px below where the scroll had just put it, visibly,
+a beat later. Removed: `scroll-padding-top` on the container already holds the
+header clear for anchors and leaves the snap box alone. Landings are now exact
+to the pixel on singles, pairs and chapter openings alike (measured: drift 0).
 
 **A jump from the margin to a distant city did not arrive.** A smooth scroll
 that travels past other photographs hands the browser snap points on the way,

@@ -142,10 +142,12 @@ const next = nextSeriesLine(series);
     margin-top: 0;
   }
 
-  /* Where a rail link lands with JavaScript off. */
-  .sequence :global([data-frame]) {
-    scroll-margin-top: calc(var(--series-header-h) + var(--safe-top) + 48px);
-  }
+  /* Nothing sets scroll-margin on a frame. It is tempting — it is how you
+     normally keep an anchor clear of a sticky header — but scroll-margin
+     grows the box the browser snaps to, so a margin at the top moves the
+     snap position up and drops the photograph below where it was scrolled
+     to: it settles, pauses, then shifts. The scroll-padding above holds the
+     header clear for anchors instead, and leaves the snap box alone. */
 
   /* ── One photograph at a time ──────────────────────────────────
      The page stops on each frame rather than drifting between them.
@@ -485,13 +487,24 @@ const next = nextSeriesLine(series);
       centreOn(pages[wanted]);
     }
 
-    let turning = false;
-    let quiet = 0;
-
-    function release() {
-      window.clearTimeout(quiet);
-      turning = false;
-    }
+    // One photograph per gesture, turned the instant the gesture starts, and
+    // never a queue: anything arriving while a turn is still gliding is
+    // dropped rather than stacked up behind it.
+    //
+    // Telling one gesture from the next is the whole difficulty on a Mac. The
+    // momentum after a flick goes on firing wheel events for a second or more
+    // and is indistinguishable from a hand on the trackpad but for one thing:
+    // momentum only ever decays. So a delta meaningfully bigger than the one
+    // before it means fingers are back on the glass and a new page is wanted;
+    // anything smaller is the tail of a swipe that has already had its page.
+    //
+    // Waiting for that tail to go quiet instead — which is what this did at
+    // first — turns one page and then ignores you for a second and a bit,
+    // which reads as the page being stuck.
+    const glide = 400;
+    let previous = 0;
+    let turned = -Infinity;
+    let settling = 0;
 
     function onWheel(event: WheelEvent) {
       // A pinch to zoom, and anything sideways, is not a page turn.
@@ -499,19 +512,26 @@ const next = nextSeriesLine(series);
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
 
-      if (!turning) {
-        turning = true;
-        turn(event.deltaY > 0 ? 1 : -1);
-      }
+      const delta = Math.abs(event.deltaY);
 
-      // One gesture, one photograph. A flick on a Mac trackpad does not end
-      // when your fingers leave it: the momentum keeps firing wheel events
-      // for a second or more afterwards, and anything that lets go of the
-      // page while that tail is still running turns three or four pages from
-      // a single swipe. So the release is pushed out by every event that
-      // arrives and only happens once the gesture has genuinely gone quiet.
-      window.clearTimeout(quiet);
-      quiet = window.setTimeout(release, 220);
+      // A moment's silence ends the gesture, so the next event — however
+      // gentle, and a slow mouse wheel is very gentle — starts a fresh one.
+      window.clearTimeout(settling);
+      settling = window.setTimeout(() => {
+        previous = 0;
+      }, 120);
+
+      // The margin over `previous` is there because momentum does not decay
+      // perfectly smoothly, and a little jitter should not read as a hand.
+      const hand = delta > previous * 1.15 + 1;
+      previous = delta;
+      if (!hand) return;
+
+      // A gesture pushes several growing events before it peaks; only the
+      // first of them turns a page.
+      if (event.timeStamp - turned < glide) return;
+      turned = event.timeStamp;
+      turn(event.deltaY > 0 ? 1 : -1);
     }
 
     // The arrows turn pages too, in both axes: left and up go back, right and
@@ -545,7 +565,7 @@ const next = nextSeriesLine(series);
       () => {
         window.removeEventListener('wheel', onWheel);
         document.removeEventListener('keydown', onKey);
-        release();
+        window.clearTimeout(settling);
       },
       { once: true },
     );
