@@ -491,20 +491,30 @@ const next = nextSeriesLine(series);
     // never a queue: anything arriving while a turn is still gliding is
     // dropped rather than stacked up behind it.
     //
-    // Telling one gesture from the next is the whole difficulty on a Mac. The
-    // momentum after a flick goes on firing wheel events for a second or more
-    // and is indistinguishable from a hand on the trackpad but for one thing:
-    // momentum only ever decays. So a delta meaningfully bigger than the one
-    // before it means fingers are back on the glass and a new page is wanted;
-    // anything smaller is the tail of a swipe that has already had its page.
+    // Telling one gesture from the next is the whole difficulty on a Mac,
+    // because a flick does not end when your fingers leave the trackpad —
+    // momentum goes on firing wheel events for a second or more. Waiting for
+    // that tail to go quiet works, but it means being ignored for the whole
+    // second, which reads as the page being stuck. Allowing a turn again
+    // after a fixed pause instead is worse: a deliberate two-finger drag
+    // lasts longer than any pause worth setting, so one swipe turns twice.
     //
-    // Waiting for that tail to go quiet instead — which is what this did at
-    // first — turns one page and then ignores you for a second and a bit,
-    // which reads as the page being stuck.
-    const glide = 400;
+    // So a gesture ends when the events stop, and nothing during a run of
+    // them turns a second page — with one exception. Momentum has a property
+    // a hand does not: it only ever decays. Once the events have fallen away
+    // steadily for a while, a delta that climbs sharply out of that decay is
+    // fingers back on the glass, and a new page is wanted at once. That is
+    // what keeps a fresh swipe during the old swipe's tail responsive without
+    // ever letting the tail itself count.
+    const glide = 350;
+    const gap = 110;
+    const decayed = 6;
+
     let previous = 0;
+    let falling = 0;
+    let armed = true;
     let turned = -Infinity;
-    let settling = 0;
+    let idle = 0;
 
     function onWheel(event: WheelEvent) {
       // A pinch to zoom, and anything sideways, is not a page turn.
@@ -514,22 +524,30 @@ const next = nextSeriesLine(series);
 
       const delta = Math.abs(event.deltaY);
 
-      // A moment's silence ends the gesture, so the next event — however
-      // gentle, and a slow mouse wheel is very gentle — starts a fresh one.
-      window.clearTimeout(settling);
-      settling = window.setTimeout(() => {
+      // A gap in the events ends the gesture outright, and the next one —
+      // however gentle, and a slow mouse wheel is very gentle — starts fresh.
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => {
+        armed = true;
         previous = 0;
-      }, 120);
+        falling = 0;
+      }, gap);
 
-      // The margin over `previous` is there because momentum does not decay
-      // perfectly smoothly, and a little jitter should not read as a hand.
-      const hand = delta > previous * 1.15 + 1;
+      if (delta < previous) {
+        falling += 1;
+      } else if (delta > previous * 1.6 + 2 && falling >= decayed) {
+        // A sharp climb out of a settled decay: a new swipe on top of the
+        // last one's momentum. A climb before the decay is just the same
+        // swipe still on its way up to full speed.
+        armed = true;
+        falling = 0;
+      }
       previous = delta;
-      if (!hand) return;
 
-      // A gesture pushes several growing events before it peaks; only the
-      // first of them turns a page.
+      if (!armed) return;
       if (event.timeStamp - turned < glide) return;
+
+      armed = false;
       turned = event.timeStamp;
       turn(event.deltaY > 0 ? 1 : -1);
     }

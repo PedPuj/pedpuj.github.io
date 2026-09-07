@@ -495,26 +495,36 @@ still handles touch on its own.
 
 **One trackpad swipe turned three or four pages.** A flick on a Mac does not end
 when your fingers leave the trackpad: momentum keeps firing wheel events for a
-second or more. Two attempts before this landed:
+second or more. Three attempts before this landed:
 
 1. Release the page after a fixed 650ms — which is *inside* the tail, so the
-   tail turned two or three more pages. This is the bug Pedro reported.
+   tail turned two or three more pages. Reported as one swipe turning three
+   or four pages.
 2. Release only after 220ms of genuine silence. Correct — one swipe, one page,
    even with an 1800ms tail — but it means being ignored for the whole length
    of the momentum, and Pedro reported *that* as the page getting stuck.
 
-What works is not waiting at all. Momentum has exactly one property that
-distinguishes it from a hand: **it only ever decays.** So a delta meaningfully
-larger than the one before it (`delta > previous * 1.15 + 1`, the margin being
-there because momentum does not decay perfectly smoothly) means fingers are
-back on the glass and a new page is wanted. A gesture pushes several growing
-events before it peaks, so a 400ms cooldown — about one glide — keeps that to
-one page. Gestures are dropped, never queued. A short silence (120ms) resets
-`previous` to zero so the next gesture, however gentle, reads as new.
+3. Turn again once a fixed 400ms cooldown had passed and the deltas were
+   climbing. This is worse than either: a deliberate two-finger drag lasts
+   longer than any cooldown worth setting, and its deltas are still rising at
+   the end of one, so a single slow swipe turned two pages. Reported as
+   "sometimes it does two scrolls in one swipe".
 
-The result: a swipe with a 1.5s tail turns one page; a fresh swipe *during*
-that tail turns immediately rather than being swallowed; five swipes in a row
-turn five pages. All verified with synthetic decaying-delta bursts.
+The mistake in (3) was treating elapsed time as evidence about the gesture. It
+is not — the gesture is the *run of events*. So: a gesture ends when the events
+stop (110ms of silence), and nothing within a run turns a second page. That
+alone would be (2) again, sticky for the length of the momentum, so there is
+one exception, and it rests on the only property momentum has that a hand does
+not — **it only ever decays**. After six consecutive falling deltas the tail is
+unmistakably a tail; a delta that then climbs sharply out of it
+(`delta > previous * 1.6 + 2`) is fingers back on the glass, and re-arms a
+turn at once. A climb *before* that decay is just the same swipe on its way up
+to speed, and is ignored. A 350ms floor between turns catches anything else.
+
+The result, all verified with synthetic bursts: a 700ms drag with a 1s tail
+turns one page; so does a 1.2s drag with a 1.5s tail and jittery deltas; ten
+swipes of random length and strength turned exactly ten pages; and a fresh
+swipe landing on top of the previous swipe's momentum still turns at once.
 
 **Every stop settled, paused, then shifted the photograph down.** Frames carried
 `scroll-margin-top` (header height + 48px), added as the landing point for a
