@@ -160,6 +160,18 @@ const next = nextSeriesLine(series);
     scroll-padding-top: calc(var(--series-header-h) + var(--safe-top));
   }
 
+  /* A chaptered series shifts the paper a hair from city to city, and that
+     shift should be felt rather than seen — hence the slow cross-fade. It
+     belongs here rather than in global.css, because there it also caught the
+     change from paper to the lightbox on the way into a photograph: opening
+     one left the near-white ground sitting behind it for the best part of a
+     second, which read as the page reloading. Between pages the ground must
+     change at once, and the view transition does the dissolving. */
+  :global(html.is-reading),
+  :global(html.is-reading) :global(body) {
+    transition: background-color 900ms ease;
+  }
+
   /* Every photograph is a stop, and so is the line out to the next series
      — without that last one, mandatory snapping would hold the bottom of
      the page permanently out of reach. */
@@ -227,6 +239,8 @@ const next = nextSeriesLine(series);
 </style>
 
 <script>
+  import { navigate } from 'astro:transitions/client';
+
   let releasing = 0;
 
   /**
@@ -370,6 +384,14 @@ const next = nextSeriesLine(series);
     // Again once the photographs have taken up their real heights.
     const settled = window.setTimeout(sync, 400);
 
+    // Only now is the cross-fade armed. Arriving from a photograph means
+    // arriving with the lightbox colour still on the root, and a transition
+    // in place at that moment washes it slowly out to paper in full view —
+    // which is exactly the "it looks like it reloaded" flash. The ground for
+    // the frame you land on is painted first, and the fade is for the cities
+    // you cross afterwards.
+    const arming = window.setTimeout(() => root.classList.add('is-reading'), 60);
+
     document.addEventListener(
       'astro:before-swap',
       () => {
@@ -377,7 +399,9 @@ const next = nextSeriesLine(series);
         window.removeEventListener('scroll', onScroll);
         window.clearTimeout(settle);
         window.clearTimeout(settled);
-        // The next page sets its own paper; don't carry a city's over.
+        window.clearTimeout(arming);
+        // The next page sets its own paper, and sets it at once.
+        root.classList.remove('is-reading');
         root.style.setProperty('--ground', base);
       },
       { once: true },
@@ -583,13 +607,74 @@ const next = nextSeriesLine(series);
       () => {
         window.removeEventListener('wheel', onWheel);
         document.removeEventListener('keydown', onKey);
-        window.clearTimeout(settling);
+        window.clearTimeout(idle);
+      },
+      { once: true },
+    );
+  }
+
+  // Opening a photograph with a thumb.
+  //
+  // A tap that lands while the page is still settling is swallowed: the
+  // browser spends it on stopping the scroll instead of on the link under
+  // your finger. Snapping makes that window longer than it used to be —
+  // there is always a glide to the nearest photograph after you let go — so
+  // taps started failing often enough to be annoying. This takes the tap
+  // itself, from touchend, which arrives whether or not the browser intends
+  // to turn it into a click.
+  //
+  // It only reads a genuine tap: a finger that barely moved, and was not
+  // held. A drag is a scroll and a long press is a long press.
+  function startTapping() {
+    const sequence = document.querySelector<HTMLElement>('.sequence');
+    if (!sequence) return;
+    // A mouse has no such trouble, and taking its clicks would only risk
+    // breaking modifier-clicks and the middle button.
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    let link: HTMLAnchorElement | null = null;
+    let x = 0;
+    let y = 0;
+    let began = 0;
+
+    function onStart(event: TouchEvent) {
+      const touch = event.changedTouches[0];
+      const target = event.target;
+      link = target instanceof Element ? target.closest('a[href]') : null;
+      x = touch.clientX;
+      y = touch.clientY;
+      began = event.timeStamp;
+    }
+
+    function onEnd(event: TouchEvent) {
+      const held = link;
+      link = null;
+      if (!held) return;
+
+      const touch = event.changedTouches[0];
+      const moved = Math.hypot(touch.clientX - x, touch.clientY - y);
+      if (moved > 12 || event.timeStamp - began > 400) return;
+
+      // Stops the browser making its own click out of this, which would
+      // otherwise open the photograph a second time.
+      event.preventDefault();
+      navigate(held.href);
+    }
+
+    sequence.addEventListener('touchstart', onStart, { passive: true });
+    sequence.addEventListener('touchend', onEnd, { passive: false });
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        sequence.removeEventListener('touchstart', onStart);
+        sequence.removeEventListener('touchend', onEnd);
       },
       { once: true },
     );
   }
 
   document.addEventListener('astro:page-load', startCounter);
+  document.addEventListener('astro:page-load', startTapping);
   document.addEventListener('astro:page-load', startRail);
   document.addEventListener('astro:page-load', startPaging);
 </script>

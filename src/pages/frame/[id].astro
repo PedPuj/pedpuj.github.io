@@ -57,7 +57,7 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
 
     <div class="chrome" data-chrome>
       <span class="mono counter">{counterText(frame.index, total)}</span>
-      <a class="close" href={backHref} aria-label="Close">✕</a>
+      <a class="close mono" href={backHref}>Close</a>
 
       {prevHref && (
         <a
@@ -158,23 +158,30 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
   .counter {
     position: absolute;
     top: calc(28px + var(--safe-top));
-    right: calc(76px + var(--safe-right));
+    right: calc(var(--margin) + var(--safe-right));
     font-size: 12px;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
   }
 
+  /* The way out, in the corner a thumb actually reaches, and written as a
+     word — a mark of 15px type in the far top corner was both the smallest
+     target on the site and the hardest to get to on a phone.
+
+     The box around the word reaches 20px further out and 16px above and
+     below, so it is 48px tall and nothing looks any different: the word
+     itself still sits on the margin with the metadata. */
   .close {
     position: absolute;
-    top: calc(26px + var(--safe-top));
-    right: calc(32px + var(--safe-right));
-    font-size: 15px;
-    line-height: 1;
+    right: calc(var(--margin) + var(--safe-right) - 20px);
+    bottom: calc(var(--chrome-bottom) + var(--safe-bottom) - 16px);
+    padding: 16px 20px;
     color: var(--lightbox-meta);
     transition: color 150ms ease;
   }
 
-  .close:hover {
+  .close:hover,
+  .close:focus-visible {
     color: var(--paper);
   }
 
@@ -217,6 +224,9 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     position: absolute;
     bottom: calc(var(--chrome-bottom) + var(--safe-bottom));
     left: calc(var(--margin) + var(--safe-left));
+    /* Stops short of the corner, so a long camera line wraps rather than
+       running underneath the way out. */
+    right: calc(var(--margin) + var(--safe-right) + 90px);
     color: var(--lightbox-meta);
   }
 
@@ -231,23 +241,19 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
 
     .counter {
       top: calc(24px + var(--safe-top));
-      right: calc(60px + var(--safe-right));
       font-size: 11px;
     }
 
-    .close {
-      top: calc(22px + var(--safe-top));
-      right: calc(20px + var(--safe-right));
-    }
-
-    .meta {
-      right: calc(var(--margin) + var(--safe-right));
-    }
   }
 </style>
 
 <script>
   import { navigate } from 'astro:transitions/client';
+
+  // Deliberately outside setupLightbox, so it survives the navigation: the
+  // click the browser synthesises from a swipe arrives on the *next* frame,
+  // after this has all been set up again.
+  let swipedAt = -Infinity;
 
   function setupLightbox() {
     const root = document.querySelector<HTMLElement>('[data-lightbox]');
@@ -260,10 +266,17 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
 
     let timer: number | undefined;
 
-    // Chrome fades away after three seconds of stillness.
+    const pointer = () =>
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    // The chrome fades away after three seconds of stillness — but only where
+    // there is a pointer to bring it back. A phone sends no mousemove, so on
+    // one it faded out three seconds after the photograph opened and stayed
+    // out: the way back was still there to be tapped, and invisible.
     function wake() {
       chrome?.classList.remove('is-idle');
       window.clearTimeout(timer);
+      if (!pointer()) return;
       timer = window.setTimeout(() => chrome?.classList.add('is-idle'), 3000);
     }
 
@@ -297,32 +310,42 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
         const to = dx < 0 ? next : prev;
         if (!to) return;
         swiped = true;
+        swipedAt = event.timeStamp;
         navigate(to);
-      } else if (dy > 72 && dy > Math.abs(dx)) {
+      } else if (dy > 64 && dy > Math.abs(dx)) {
         swiped = true;
+        swipedAt = event.timeStamp;
         navigate(back);
       }
     }
 
-    // Clicking the photograph steps through the sequence: its left half goes
-    // back, its right half goes on. Clicking the ground around it closes.
-    // Pointer devices only — on a phone the swipes above already do this, and
-    // a stray tap should not throw you out of the frame.
+    // The ground around the photograph closes, under a thumb as well as a
+    // mouse — it is the largest target on the screen and, with the word in
+    // the corner, means there are two easy ways out rather than one hard one.
+    //
+    // The photograph itself steps through the sequence, its left half back
+    // and its right half on, but only with a pointer: on a phone the swipes
+    // do that, and a tap on the picture should do nothing at all.
     const stage = root.querySelector<HTMLElement>('.stage');
 
     function onClick(event: MouseEvent) {
-      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
       const target = event.target;
       if (!(target instanceof Element)) return;
-      // The close mark and the arrows say what they do; leave them to it.
+      // The way out and the arrows say what they do; leave them to it.
       if (target.closest('a')) return;
 
       if (stage && stage.contains(target)) {
+        if (!pointer()) return;
         const box = stage.getBoundingClientRect();
         const to = event.clientX > box.left + box.width / 2 ? next : prev;
         if (to) navigate(to);
         return;
       }
+
+      // A swipe ends with the browser making a click out of it, on whichever
+      // frame the swipe has just brought in. Without this, swiping through
+      // the sequence would close it on arrival.
+      if (event.timeStamp - swipedAt < 700) return;
 
       navigate(back);
     }
@@ -331,6 +354,7 @@ const slotWidth = `${Math.round(88 * ratio)}vh`;
     document.addEventListener('mousemove', wake);
     root.addEventListener('click', onClick);
     root.addEventListener('touchstart', onTouchStart, { passive: true });
+    root.addEventListener('touchstart', wake, { passive: true });
     root.addEventListener('touchmove', onTouchMove, { passive: true });
 
     document.addEventListener(

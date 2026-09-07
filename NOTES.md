@@ -585,3 +585,78 @@ Two other directions were considered and set aside:
 - **Contact-sheet overture** — open the series with all 37 as thumbnails, then
   run the sequence full size. Very photographer-native; rejected for now only
   because it puts type and grid before the first photograph.
+
+---
+
+# Three mobile faults (7 Sep 2026)
+
+Pedro, on a phone: taps on a photograph often failed while the page was still
+moving; the way out of a full-screen photograph was hard to find and hard to
+hit; and closing one flashed white "like a reload".
+
+## The white flash was two bugs, and the worse one was invisible
+
+**A stale identifier in a cleanup handler.** The wheel pager's timer was
+renamed `settling` → `idle` when the gesture detection was rewritten, but the
+`astro:before-swap` cleanup still cleared `settling`. Astro `<script>` blocks
+are transpiled, not type-checked, so the build was clean and it shipped. Every
+navigation *away* from a series page threw a ReferenceError inside the swap
+handler, which aborted the view transition — hence "like a reload". It went
+unnoticed because the tests after that change all stayed on the same page.
+
+Worth remembering: `npm run build` will not catch this. A navigation off the
+page, with the console open, will.
+
+**A transition that was never meant to apply between pages.** `html, body {
+transition: background-color 900ms }` in global.css was added for the per-city
+paper shift, but it caught the paper → lightbox change too: measured, the root
+canvas stayed *paper* for 899ms after opening a photograph, so the near-white
+ground sat behind the picture for the best part of a second. It now lives in
+the series page's own stylesheet, and only under `html.is-reading`, a class
+added 60ms after the page settles — without that gate, arriving back from a
+photograph would slowly wash the lightbox colour out to paper in full view.
+After the fix the ground changes in 35ms.
+
+## Taps were being spent on stopping the scroll
+
+A tap that lands while the page is still moving is swallowed: the browser
+spends it stopping the scroll rather than on the link underneath. Snapping made
+that window longer, because there is always a glide to the nearest photograph
+after you let go.
+
+Taps are now taken from `touchend` on the sequence, which arrives whether or
+not the browser means to make a click of it, with `preventDefault` to stop the
+duplicate. Only a genuine tap counts — moved less than 12px, held less than
+400ms — so a drag is still a scroll and a long press is still a long press.
+Pointer devices are left alone entirely; they never had the problem, and taking
+their clicks would break modifier-clicks and the middle button.
+
+The trade: a tap meant to stop a moving page now opens a photograph. With
+snapping the page settles on its own anyway, so "tap to stop" has little left
+to do.
+
+## The way out was invisible for three seconds
+
+The chrome fades after three seconds of stillness and `mousemove` brings it
+back. A phone sends no `mousemove` — so three seconds after opening any
+photograph the close mark faded out and stayed out. Still tappable, completely
+invisible. That, rather than anything about the mark itself, is why closing was
+hard. The chrome now only idles where there is a pointer to wake it.
+
+The mark was also the smallest target on the site (15px of type) in the corner
+hardest to reach with a thumb. It is now the word `Close` — typographic, like
+everything else here — in the bottom right, with a 48px-tall box reaching into
+the corner of the screen. The counter moved back onto the margin now that it
+has nothing to clear, and the metadata stops 90px short of the corner so a long
+camera line wraps rather than running underneath.
+
+Two more ways out on touch: the ground around the photograph closes (the
+largest target on the screen, and standard in every lightbox), and the
+swipe-down threshold came down from 72 to 64.
+
+Enabling the ground tap needed a guard. A swipe ends with the browser
+synthesising a click, and that click lands on *the frame the swipe navigated
+to* — so swiping through the sequence would have closed it on arrival. The
+timestamp of the last swipe therefore lives outside `setupLightbox`, at module
+scope, because the function has already been torn down and set up again by the
+time the click arrives.

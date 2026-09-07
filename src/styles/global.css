@@ -67,9 +67,6 @@
 
 html {
   background: var(--ground);
-  /* Chaptered series shift the paper a hair from city to city as you read.
-     Slow enough to be felt rather than seen. */
-  transition: background-color 900ms ease;
   /* Loose, About and the homepage are short enough to fit the window, so they
      have no scrollbar, while /work and the series pages do. Where the
      scrollbar is a classic one that takes width, that made those pages 15px
@@ -83,7 +80,6 @@ html {
 body {
   margin: 0;
   background: var(--ground);
-  transition: background-color 900ms ease;
   color: var(--ink);
   font-family: var(--sans);
   font-weight: 400;
