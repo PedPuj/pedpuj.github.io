@@ -762,7 +762,10 @@ than any amount of instrumenting the cases that do.
 Pedro asked whether the China spread was "pretty enough or well organised
 enough". The answer was that it was well organised and not yet well composed,
 and the review that says why — with all 32 pages drawn to scale — is
-`design/china-flat-plan.html`. Two of the six faults it names are fixed here.
+`design/china-flat-plan.html` — which is **not in the repo**: it embeds all 37
+photographs to open as a single self-contained file, so at 1.4MB it is
+gitignored and lives on disk only. Regenerate it by asking for the review
+again. Two of the six faults it names are fixed here.
 
 ## The diagnosis
 

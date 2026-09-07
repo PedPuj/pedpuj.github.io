@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # editor/assistant tooling, not part of the site
 .claude/
+
+# review documents: self-contained HTML with the photographs embedded in it,
+# so megabytes each. They live next to the project on disk, not in the history.
+design/*-flat-plan.html
