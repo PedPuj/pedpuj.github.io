@@ -9,7 +9,7 @@
 import type { ImageMetadata } from 'astro';
 import { site } from './site';
 import { series as seriesInput, loose as looseInput } from './frames';
-import type { FrameInput, Orientation, SeriesInput } from './frames';
+import type { ChapterInput, FrameInput, Orientation, SeriesInput } from './frames';
 
 /** Every image under src/images, resolved at build time. */
 const files = import.meta.glob<{ default: ImageMetadata }>(
@@ -43,6 +43,8 @@ export interface Frame {
   /** The filename this frame is looking for, for when it isn't there. */
   file: string;
   orientation: Orientation;
+  /** Where it was taken, as written in frames.ts. Null when not given. */
+  place: string | null;
   metadata: string;
   /** True when this frame sits side by side with the next one. */
   pair: boolean;
@@ -64,6 +66,7 @@ function build(collection: string, inputs: FrameInput[]): Frame[] {
       slot: f.slot,
       file: f.file,
       orientation: f.orientation,
+      place: f.place ?? null,
       metadata: metadataLine(f),
       pair: f.pair === true,
       href: `/frame/${id}/`,
@@ -73,9 +76,65 @@ function build(collection: string, inputs: FrameInput[]): Frame[] {
   });
 }
 
-export interface Series extends Omit<SeriesInput, 'frames' | 'cover'> {
+/** One leg of a journey: a run of consecutive frames sharing a place. */
+export interface Chapter extends ChapterInput {
+  /** 1-based position in the series. */
+  index: number;
+  /** The `place` string that gathered these frames. */
+  place: string;
+  frames: Frame[];
+  /** First and last frame numbers, e.g. 1 and 12. */
+  from: number;
+  to: number;
+  /** "001 — 012 · 12 FRAMES" */
+  rangeLine: string;
+}
+
+/**
+ * Walks the edit in order and starts a new chapter every time the place
+ * changes to one the series has named. Frames before the first named place,
+ * or with no place at all, stay outside any chapter — the sequence simply
+ * runs on, which is what a series without `chapters` does everywhere.
+ */
+function chaptersOf(
+  frames: Frame[],
+  named: Record<string, ChapterInput> | undefined,
+): Chapter[] {
+  if (!named) return [];
+  const out: Chapter[] = [];
+  for (const frame of frames) {
+    const place = frame.place;
+    const entry = place ? named[place] : undefined;
+    if (!entry || !place) continue;
+    const current = out[out.length - 1];
+    if (current && current.place === place) {
+      current.frames.push(frame);
+      continue;
+    }
+    out.push({
+      ...entry,
+      index: out.length + 1,
+      place,
+      frames: [frame],
+      from: frame.index,
+      to: frame.index,
+      rangeLine: '',
+    });
+  }
+  for (const chapter of out) {
+    chapter.from = chapter.frames[0].index;
+    chapter.to = chapter.frames[chapter.frames.length - 1].index;
+    const n = chapter.frames.length;
+    chapter.rangeLine = `${pad(chapter.from)} — ${pad(chapter.to)} · ${n} ${n === 1 ? 'FRAME' : 'FRAMES'}`;
+  }
+  return out;
+}
+
+export interface Series extends Omit<SeriesInput, 'frames' | 'cover' | 'chapters'> {
   frames: Frame[];
   frameCount: number;
+  /** Empty when the series is one continuous run. */
+  chapters: Chapter[];
   cover: { image: ImageMetadata | null; slot: string };
   /** e.g. "BEIJING, XI'AN, SHANGHAI, GUILIN — 2026 — 38 FRAMES" */
   monoLine: string;
@@ -88,6 +147,7 @@ export const allSeries: Series[] = seriesInput.map((s) => {
     ...s,
     frames,
     frameCount: frames.length,
+    chapters: chaptersOf(frames, s.chapters),
     cover: { image: lookup(s.slug, s.cover.file), slot: s.cover.slot },
     monoLine: `${s.places} — ${s.year} — ${frames.length} ${frames.length === 1 ? 'FRAME' : 'FRAMES'}`,
     href: `/work/${s.slug}/`,

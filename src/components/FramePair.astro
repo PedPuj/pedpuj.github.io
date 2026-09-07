@@ -6,8 +6,9 @@ interface Props {
   frames: [Frame, Frame];
   treatment?: 'bare' | 'mount';
   eager?: boolean;
+  anchor?: boolean;
 }
-const { frames, treatment = 'bare', eager = false } = Astro.props;
+const { frames, treatment = 'bare', eager = false, anchor = false } = Astro.props;
 
 const ratioOf = (frame: Frame) =>
   frame.image
@@ -32,6 +33,7 @@ const maxWidth = `calc(${sum} * 56vh + var(--gutter) + ${chrome}px)`;
         frame={frame}
         treatment={treatment}
         eager={eager}
+        anchor={anchor}
         fill
         class="pair-item"
         style={`--flex: ${ratios[i]}`}

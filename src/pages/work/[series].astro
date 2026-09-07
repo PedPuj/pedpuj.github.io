@@ -1,10 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
 import SeriesHeader from '../../components/SeriesHeader.astro';
+import SeriesRail from '../../components/SeriesRail.astro';
+import ChapterMark from '../../components/ChapterMark.astro';
 import FrameView from '../../components/Frame.astro';
 import FramePair from '../../components/FramePair.astro';
 import { allSeries, nextSeriesLine } from '../../data/catalog';
-import type { Frame } from '../../data/catalog';
+import type { Chapter, Frame } from '../../data/catalog';
 
 export function getStaticPaths() {
   return allSeries.map((s) => ({ params: { series: s.slug }, props: { series: s } }));
@@ -12,40 +14,59 @@ export function getStaticPaths() {
 
 const { series } = Astro.props;
 
-// The edit, grouped: a frame marked `pair` sits beside the one after it.
-const groups: Frame[][] = [];
+// Which frame each chapter opens on, so the sequence knows where to break.
+const opens = new Map<number, Chapter>(series.chapters.map((c) => [c.from, c]));
+
+// The edit, laid out: a chapter mark wherever the journey moves on, and a
+// frame marked `pair` sitting beside the one after it — unless that one
+// starts a new city, in which case the pair is dropped rather than carried
+// across the break.
+type Block =
+  | { kind: 'chapter'; chapter: Chapter }
+  | { kind: 'frames'; frames: Frame[] };
+
+const blocks: Block[] = [];
 for (let i = 0; i < series.frames.length; i += 1) {
   const frame = series.frames[i];
+  const chapter = opens.get(frame.index);
+  if (chapter) blocks.push({ kind: 'chapter', chapter });
+
   const partner = series.frames[i + 1];
-  if (frame.pair && partner) {
-    groups.push([frame, partner]);
+  if (frame.pair && partner && !opens.has(partner.index)) {
+    blocks.push({ kind: 'frames', frames: [frame, partner] });
     i += 1;
   } else {
-    groups.push([frame]);
+    blocks.push({ kind: 'frames', frames: [frame] });
   }
 }
 
+const firstFrames = blocks.findIndex((b) => b.kind === 'frames');
 const next = nextSeriesLine(series);
 ---
 
 <Base title={series.title} ground={series.ground} accent={series.counterColor}>
   <SeriesHeader series={series} />
+  {series.chapters.length > 0 && <SeriesRail series={series} />}
 
   <main id="main" class="series">
     <div class="sequence">
       {
-        groups.map((group, i) =>
-          group.length === 2 ? (
+        blocks.map((block, i) =>
+          block.kind === 'chapter' ? (
+            <ChapterMark chapter={block.chapter} />
+          ) : block.frames.length === 2 ? (
             <FramePair
-              frames={group as [Frame, Frame]}
+              frames={block.frames as [Frame, Frame]}
               treatment={series.treatment}
-              eager={i === 0}
+              eager={i === firstFrames}
+              anchor
             />
           ) : (
             <FrameView
-              frame={group[0]}
+              frame={block.frames[0]}
               treatment={series.treatment}
-              eager={i === 0}
+              eager={i === firstFrames}
+              anchor
             />
           ),
         )
@@ -73,6 +94,22 @@ const next = nextSeriesLine(series);
     /* Roughly a quarter of the screen of empty paper between frames. */
     gap: 25vh;
     padding: 120px var(--margin) 0;
+  }
+
+  /* A chapter opens with a wider pause in front of it and a shorter one
+     behind: the city's name and its first photograph belong together. */
+  .sequence :global(.chapter) {
+    margin-top: 10vh;
+    margin-bottom: -8vh;
+  }
+
+  .sequence :global(.chapter:first-child) {
+    margin-top: 0;
+  }
+
+  /* Where a rail link lands with JavaScript off. */
+  .sequence :global([data-frame]) {
+    scroll-margin-top: calc(var(--series-header-h) + var(--safe-top) + 48px);
   }
 
   .next-wrap {
@@ -114,6 +151,11 @@ const next = nextSeriesLine(series);
       padding-top: 72px;
     }
 
+    .sequence :global(.chapter) {
+      margin-top: 6vh;
+      margin-bottom: -6vh;
+    }
+
     .next-wrap {
       margin-top: 96px;
       padding-bottom: 80px;
@@ -122,20 +164,94 @@ const next = nextSeriesLine(series);
 </style>
 
 <script>
+  /** Puts an element in the middle of the paper below the sticky header. */
+  function centreOn(y: number) {
+    const header = document.querySelector<HTMLElement>('.series-header');
+    const top = header?.offsetHeight ?? 0;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({
+      top: y - (top + (window.innerHeight - top) / 2),
+      behavior: still ? 'auto' : 'smooth',
+    });
+  }
+
+  const centreOf = (el: HTMLElement) => {
+    const box = el.getBoundingClientRect();
+    return box.top + box.height / 2 + window.scrollY;
+  };
+
+  // One observer drives everything that answers to where you are reading:
+  // the counter, the city in the header, the mark in the margin rail, and
+  // the colour of the paper itself.
   function startCounter() {
     const counter = document.querySelector<HTMLElement>('[data-counter]');
+    const number = document.querySelector<HTMLElement>('[data-counter-num]');
+    const placeOut = document.querySelector<HTMLElement>('[data-counter-place]');
     const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
-    if (!counter || frames.length === 0) return;
+    const marks = Array.from(document.querySelectorAll<HTMLElement>('[data-chapter]'));
+    if (!counter || !number || frames.length === 0) return;
 
     const total = counter.dataset.total ?? String(frames.length);
     const pad = (n: string) => n.padStart(3, '0');
 
+    // The cities this series is actually told in, and the paper each one is
+    // printed on, read off the chapter marks themselves. Both are empty on a
+    // series without chapters — Japan moves between three cities every other
+    // frame, and naming them in the corner would only flicker.
+    const chaptered = new Set<string>();
+    const grounds = new Map<string, string>();
+    for (const mark of marks) {
+      const place = mark.dataset.place;
+      if (!place) continue;
+      chaptered.add(place);
+      if (mark.dataset.ground) grounds.set(place, mark.dataset.ground);
+    }
+    const root = document.documentElement;
+    const base = root.style.getPropertyValue('--ground');
+
+    let shownPlace: string | null = null;
+
+    function showPlace(place: string | undefined) {
+      const value = place ?? null;
+      if (value === shownPlace) return;
+      shownPlace = value;
+
+      if (placeOut) placeOut.textContent = value ? `${value} · ` : '';
+
+      if (grounds.size > 0) {
+        root.style.setProperty('--ground', (value && grounds.get(value)) || base);
+      }
+
+      for (const group of document.querySelectorAll<HTMLElement>('.rail .group')) {
+        group.classList.toggle('is-current', group.dataset.place === value);
+      }
+    }
+
+    let markedTick: HTMLElement | null = null;
+
+    function markTick(index: string) {
+      const tick = document.querySelector<HTMLElement>(`[data-tick="${index}"]`);
+      if (tick === markedTick) return;
+      markedTick?.classList.remove('is-current');
+      tick?.classList.add('is-current');
+      markedTick = tick ?? null;
+    }
+
+    function show(el: HTMLElement | null | undefined) {
+      if (!el) return;
+      const index = el.dataset.index;
+      if (index) {
+        number.textContent = `${pad(index)} / ${total}`;
+        markTick(index);
+      }
+      const place = el.dataset.place;
+      showPlace(place && chaptered.has(place) ? place : undefined);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const index = (entry.target as HTMLElement).dataset.index;
-          if (index) counter.textContent = `${pad(index)} / ${total}`;
+          if (entry.isIntersecting) show(entry.target as HTMLElement);
         }
       },
       // Fires as a photograph crosses the vertical centre of the viewport.
@@ -143,9 +259,89 @@ const next = nextSeriesLine(series);
     );
 
     frames.forEach((frame) => observer.observe(frame));
-    document.addEventListener('astro:before-swap', () => observer.disconnect(), {
-      once: true,
-    });
+    marks.forEach((mark) => observer.observe(mark));
+
+    // The observer only ever hears about what crosses the middle of the
+    // screen, so anything that arrives somewhere without scrolling past —
+    // a link straight to a frame, a restored reading position, a jump from
+    // the rail — would leave the counter reading whatever it read before.
+    // This settles it by simply looking at what is on screen.
+    function nearest(list: HTMLElement[]) {
+      const middle = window.scrollY + window.innerHeight / 2;
+      let best = Infinity;
+      let chosen: HTMLElement | null = null;
+      for (const el of list) {
+        const distance = Math.abs(centreOf(el) - middle);
+        if (distance < best) {
+          best = distance;
+          chosen = el;
+        }
+      }
+      return chosen;
+    }
+
+    function sync() {
+      show(nearest(frames));
+      // A chapter mark can be closer than any photograph, and when it is,
+      // it is the city you have just arrived in that should be named.
+      const marker = nearest([...frames, ...marks]);
+      const place = marker?.dataset.place;
+      showPlace(place && chaptered.has(place) ? place : undefined);
+    }
+
+    let settle = 0;
+    const onScroll = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(sync, 120);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    sync();
+    // Again once the photographs have taken up their real heights.
+    const settled = window.setTimeout(sync, 400);
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        observer.disconnect();
+        window.removeEventListener('scroll', onScroll);
+        window.clearTimeout(settle);
+        window.clearTimeout(settled);
+        // The next page sets its own paper; don't carry a city's over.
+        root.style.setProperty('--ground', base);
+      },
+      { once: true },
+    );
+  }
+
+  // The rail in the left margin: every mark is a real link to a real anchor,
+  // so it works without this. With it, the frame is centred rather than
+  // dropped under the header, and the page glides instead of jumping.
+  function startRail() {
+    const rail = document.querySelector<HTMLElement>('.rail');
+    if (!rail) return;
+
+    function onClick(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const tick = target.closest<HTMLElement>('[data-tick]');
+      if (!tick || event.metaKey || event.ctrlKey || event.shiftKey) return;
+
+      const frame = document.querySelector<HTMLElement>(
+        `[data-frame][data-index="${tick.dataset.tick}"]`,
+      );
+      if (!frame) return;
+
+      event.preventDefault();
+      centreOn(centreOf(frame));
+    }
+
+    rail.addEventListener('click', onClick);
+    document.addEventListener(
+      'astro:before-swap',
+      () => rail.removeEventListener('click', onClick),
+      { once: true },
+    );
   }
 
   // Left and right step through the sequence, a photograph at a time, like
@@ -161,8 +357,7 @@ const next = nextSeriesLine(series);
     function stops() {
       const out: { el: HTMLElement; y: number }[] = [];
       for (const frame of frames) {
-        const box = frame.getBoundingClientRect();
-        const y = box.top + box.height / 2 + window.scrollY;
+        const y = centreOf(frame);
         const last = out[out.length - 1];
         if (last && Math.abs(last.y - y) < 8) continue;
         out.push({ el: frame, y });
@@ -202,17 +397,7 @@ const next = nextSeriesLine(series);
       if (!next) return;
 
       event.preventDefault();
-
-      // Centre it in the paper below the header, rather than in the viewport:
-      // the sticky header would otherwise sit a little over every photograph.
-      const header = document.querySelector<HTMLElement>('.series-header');
-      const top = header?.offsetHeight ?? 0;
-      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      window.scrollTo({
-        top: next.y - (top + (window.innerHeight - top) / 2),
-        behavior: still ? 'auto' : 'smooth',
-      });
+      centreOn(next.y);
     }
 
     document.addEventListener('keydown', onKey);
@@ -224,5 +409,6 @@ const next = nextSeriesLine(series);
   }
 
   document.addEventListener('astro:page-load', startCounter);
+  document.addEventListener('astro:page-load', startRail);
   document.addEventListener('astro:page-load', startPaging);
 </script>

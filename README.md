@@ -125,6 +125,33 @@ Each photograph is one line that looks like this:
 Copy an existing line, change the words between the quote marks, keep the
 commas and brackets exactly where they are. That's the whole job.
 
+### Chapters, for a series that travels
+
+China is a journey through five cities, so it is told in chapters: the sequence
+stops at each new city, names it, and moves on. Near the top of the China block
+in `frames.ts` there is a `chapters:` list that says so:
+
+```
+chapters: {
+  BEIJING: { name: 'Beijing', local: '北京', ground: '#F2F0EA' },
+  ...
+},
+```
+
+| The bit | What it means |
+|---|---|
+| The key (`BEIJING`) | Must match the `place` written on the photographs, **exactly**. That is how a photograph knows which chapter it is in. |
+| `name` | The city as you want it printed |
+| `local` | The city in its own script, drawn large and pale. Leave it out for none. |
+| `ground` | The paper colour while that city is on screen. Keep it very close to the series' own `ground` — this is meant to be felt, not seen. |
+
+The chapters come out **in the order the photographs run**, not the order you
+write them here — so re-ordering the edit re-orders the journey on its own. A
+city's chapter is however many photographs of it sit together in a row.
+
+Leave `chapters:` out of a series entirely and nothing changes: the sequence
+runs straight through, as Japan does.
+
 **Until a file exists, its place on the site shows as a flat grey block** with a
 note telling you which file is missing. That is deliberate — you can lay out the
 whole sequence first and fill it in later.

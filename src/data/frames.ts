@@ -37,6 +37,16 @@ export interface FrameInput {
   pair?: boolean;
 }
 
+export interface ChapterInput {
+  /** How the place is written out under the big characters, e.g. "Xi'an". */
+  name: string;
+  /** The same name in the local script. Leave it out and none is drawn. */
+  local?: string;
+  /** The paper colour while this chapter is on screen. Keep it very close
+      to the series `ground` — this should be felt, not noticed. */
+  ground?: string;
+}
+
 export interface SeriesInput {
   slug: string;
   title: string;
@@ -50,6 +60,16 @@ export interface SeriesInput {
   ground: string;
   counterColor: string;
   treatment: 'bare' | 'mount';
+  /**
+   * A journey, told in chapters. Every key must match a `place` written on
+   * the frames below, exactly — that is how a frame knows which chapter it
+   * belongs to. The chapters come out in the order the frames run, not the
+   * order they are written here.
+   *
+   * Leave this out completely and the series stays one continuous run,
+   * exactly as it was.
+   */
+  chapters?: Record<string, ChapterInput>;
   cover: { file: string; slot: string };
   /** slug of the series the "next series" line points at. */
   next: string;
@@ -70,6 +90,13 @@ export const series: SeriesInput[] = [
     ground: '#F5F2EC',
     counterColor: '#9E2B25',
     treatment: 'bare',
+    chapters: {
+      BEIJING: { name: 'Beijing', local: '北京', ground: '#F2F0EA' },
+      "XI'AN": { name: "Xi'an", local: '西安', ground: '#F6F1E7' },
+      GUILIN: { name: 'Guilin', local: '桂林', ground: '#F1F3EE' },
+      HANGZHOU: { name: 'Hangzhou', local: '杭州', ground: '#F2F2EF' },
+      SHANGHAI: { name: 'Shanghai', local: '上海', ground: '#F5EFE8' },
+    },
     cover: { file: 'dscf2433.jpg', slot: 'Forbidden City roofs above the red wall' },
     next: 'japan',
     frames: [

@@ -13,7 +13,9 @@ const start = counterText(1, series.frameCount);
 <header class="series-header">
   <Wordmark />
   <span class="series-title">{series.title}</span>
-  <span class="counter mono" data-counter data-total={series.frameCount}>{start}</span>
+  <span class="counter mono" data-counter data-total={series.frameCount}>
+    <span class="counter-place" data-counter-place></span><span data-counter-num>{start}</span>
+  </span>
 </header>
 
 <style>
@@ -49,6 +51,17 @@ const start = counterText(1, series.frameCount);
     color: var(--accent);
     font-variant-numeric: tabular-nums;
     transition: color 200ms ease;
+  }
+
+  /* Where you are, when the series is a journey. It appears as you cross
+     into a city and stays until you cross into the next one. */
+  .counter-place {
+    color: var(--ink-2);
+    transition: opacity 250ms ease;
+  }
+
+  .counter-place:empty {
+    opacity: 0;
   }
 
   /* Mobile header is wordmark and counter only. */

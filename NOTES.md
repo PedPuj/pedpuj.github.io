@@ -376,3 +376,112 @@ Flagged to Pedro rather than presented as fact:
 
 `dist` is now 88MB (198 generated WebP renditions from 37 sources). Well within
 GitHub Pages limits, but worth watching once Workers and Japan are filled in.
+
+---
+
+# The China layout — chapters and the margin rail (7 Sep 2026)
+
+## What was wrong
+
+/work/china was 37 frames in one uniform centred column: every photograph capped
+at 78vh, 25vh of paper between each, 32 screens of scrolling, and the only
+variation in the whole page was the five side-by-side pairs. Three specific
+faults:
+
+1. **The journey was invisible.** The edit runs Beijing → Xi'an → Guilin →
+   Hangzhou → Shanghai and `frames.ts` already had comment dividers for it. The
+   page named all five cities once, in the header, and then never again.
+2. **`001 / 37` was the only orientation.** No shape to the whole, no way to
+   move around inside it.
+3. **The accent red `#9E2B25` barely appeared** — a 12px counter and two hover
+   rules, on a series whose subject is saturated with that colour.
+
+## What was built
+
+### Chapters, derived rather than declared
+
+`SeriesInput` gained an optional `chapters` record keyed by the `place` already
+written on every frame. Frames sharing a place, consecutively, become a chapter.
+Nothing is indexed by position, so re-ordering the edit re-orders the journey
+with no other edit — which matters, because re-ordering the edit is the single
+thing Pedro does most.
+
+Rejected: a `chapter: 'Beijing'` field on the frame that opens each one (two
+sources of truth for the same fact, and it goes stale on the first re-order),
+and deriving chapters from `place` unconditionally (Japan's three cities
+interleave every other frame, which would have produced ten chapters for ten
+photographs).
+
+Each chapter is drawn as a hairline across the full measure, the city's
+characters at up to 150px in a 26% tint of the series accent, the Latin name
+under them, and the frame range pushed to the far edge of the measure. Type only
+— nothing is ever drawn over a photograph, which is the same rule the hover
+frame-number already follows.
+
+### The rail
+
+A fixed spine in the left margin: one mark per frame, 15px wide for a landscape
+and 8px for a portrait, so the rail literally draws the shape of the edit.
+Gathered into five clusters, one per city. The current frame's mark takes the
+accent and reaches further out; the city you are in lifts out of the hairline.
+Every mark is a real `<a>` to a real anchor, so it works with JavaScript off;
+with it, the click centres the frame instead of dropping it under the header.
+
+City names are set **vertically** (`writing-mode: vertical-rl`) and appear on
+hover. They started horizontal and had to move: at 11px they ran from x=49 to
+x=100, and a width-limited photograph starts at x=64, so a hovered label sat on
+top of the picture. Vertical keeps them inside the 64px margin at every window
+size. The gap between clusters is 20px rather than the 8px pitch because a short
+cluster's name, stood on its end, is taller than the cluster itself — Hangzhou's
+five marks are 40px and its name is 50px.
+
+Hidden below 1025px wide or 620px tall: there is no margin to stand in.
+
+### The paper
+
+Each city shifts `--ground` a few units and cross-fades over 900ms — Beijing
+greyer (winter, haze, snow), Xi'an warmer (brick, food), Guilin greener (river),
+Shanghai warmest (lanterns). All within ~6 units of the base `#F5F2EC`. Meant to
+be felt on a long scroll, not noticed.
+
+### The counter
+
+Now reads `BEIJING · 004 / 37`. Only on a series that has chapters — Japan was
+briefly showing `KYOTO · 004 / 10` and flickering city names every other frame,
+which is why the place is gated on the chapter set rather than on `place`
+existing.
+
+## The bug worth remembering
+
+The counter was driven purely by an IntersectionObserver with a
+`-50% 0px -50% 0px` root margin, i.e. it only ever hears about what *crosses*
+the middle of the screen. Anything that arrives somewhere without scrolling past
+— a rail click, a `/work/china/#f24` link, a restored reading position on the
+way back from a full-screen view — left it reading whatever it read before.
+Jumping to the Guilin chapter gave `GUILIN · 001 / 37`.
+
+Fixed with a `sync()` that just looks at what is nearest the centre of the
+screen, run on load, again 400ms later once the photographs have taken their
+real heights, and 120ms after scrolling settles. The observer still does the
+live updating; `sync()` only corrects it.
+
+## Known, not fixed
+
+Holding or hammering the arrow keys advances one frame, not one per press: each
+press measures "where you are" from the current scroll position, which during a
+`behavior: 'smooth'` animation has not arrived yet. Pre-existing, unchanged by
+this work, and invisible at a reading pace — three paced presses step three
+pages correctly. Fixing it means tracking a target index rather than reading the
+scroll position.
+
+## Not built
+
+Two other directions were considered and set aside:
+
+- **Asymmetric editorial grid** — frames pushed off-centre, some full-bleed,
+  spreads changing shape the way a photobook's do. The strongest answer to the
+  monotony, but it needs a decision per photograph from Pedro, and derived
+  automatically it would read as a template.
+- **Contact-sheet overture** — open the series with all 37 as thumbnails, then
+  run the sequence full size. Very photographer-native; rejected for now only
+  because it puts type and grid before the first photograph.

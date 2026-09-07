@@ -15,6 +15,8 @@ interface Props {
   link?: boolean;
   /** Give the image a view-transition name, for the morph into /frame/. */
   morph?: boolean;
+  /** Give the figure an id, so the rail in the margin can link to it. */
+  anchor?: boolean;
   class?: string;
   style?: string;
 }
@@ -27,6 +29,7 @@ const {
   fill = false,
   link = true,
   morph = true,
+  anchor = false,
   class: className = '',
   style: extraStyle = '',
 } = Astro.props;
@@ -63,6 +66,8 @@ const number = String(frame.index).padStart(3, '0');
   style={style}
   data-frame
   data-index={frame.index}
+  data-place={frame.place ?? undefined}
+  id={anchor ? `f${frame.index}` : undefined}
 >
   <Tag class="target" {...attrs}>
     <span class="mat">
