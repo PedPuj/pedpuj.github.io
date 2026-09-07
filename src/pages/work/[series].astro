@@ -54,9 +54,12 @@ const next = nextSeriesLine(series);
 
     {
       next && (
-        <a class="mono next" href={next.href}>
-          {next.text}
-        </a>
+        <div class="next-wrap">
+          <a class="mono next" href={next.href} data-astro-prefetch="hover">
+            {next.text}
+            <span class="next-rule" aria-hidden="true" />
+          </a>
+        </div>
       )
     }
   </main>
@@ -72,10 +75,14 @@ const next = nextSeriesLine(series);
     padding: 120px var(--margin) 0;
   }
 
-  .next {
-    display: block;
+  .next-wrap {
     margin-top: 140px;
     padding: 0 var(--margin) 120px;
+  }
+
+  .next {
+    position: relative;
+    display: inline-block;
     color: var(--ink-2);
     transition: color 150ms ease;
   }
@@ -84,13 +91,30 @@ const next = nextSeriesLine(series);
     color: var(--ink);
   }
 
+  /* Draws left to right, as on the series index. */
+  .next-rule {
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    display: block;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 250ms ease;
+  }
+
+  .next:hover .next-rule,
+  .next:focus-visible .next-rule {
+    width: 100%;
+  }
+
   @media (max-width: 768px) {
     .sequence {
       gap: 18vh;
       padding-top: 72px;
     }
 
-    .next {
+    .next-wrap {
       margin-top: 96px;
       padding-bottom: 80px;
     }
@@ -124,5 +148,81 @@ const next = nextSeriesLine(series);
     });
   }
 
+  // Left and right step through the sequence, a photograph at a time, like
+  // turning pages. Only the horizontal keys are taken: the wheel, the space
+  // bar and the up/down keys scroll exactly as the browser intended.
+  function startPaging() {
+    const frames = Array.from(document.querySelectorAll<HTMLElement>('[data-frame]'));
+    if (frames.length === 0) return;
+
+    // Measured fresh on each press, because photographs finish loading and
+    // the page settles as you read. A side-by-side pair shares a vertical
+    // position, so it counts as one page rather than two.
+    function stops() {
+      const out: { el: HTMLElement; y: number }[] = [];
+      for (const frame of frames) {
+        const box = frame.getBoundingClientRect();
+        const y = box.top + box.height / 2 + window.scrollY;
+        const last = out[out.length - 1];
+        if (last && Math.abs(last.y - y) < 8) continue;
+        out.push({ el: frame, y });
+      }
+      return out;
+    }
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      // Not always an element — a keypress with nothing focused targets the
+      // document itself, which has no closest().
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest('input, textarea, select, [contenteditable]')
+      ) {
+        return;
+      }
+
+      const pages = stops();
+      if (pages.length === 0) return;
+
+      // Where you are: the photograph nearest the middle of the screen.
+      const middle = window.scrollY + window.innerHeight / 2;
+      let current = 0;
+      let best = Infinity;
+      pages.forEach((page, i) => {
+        const distance = Math.abs(page.y - middle);
+        if (distance < best) {
+          best = distance;
+          current = i;
+        }
+      });
+
+      const next = pages[current + (event.key === 'ArrowRight' ? 1 : -1)];
+      if (!next) return;
+
+      event.preventDefault();
+
+      // Centre it in the paper below the header, rather than in the viewport:
+      // the sticky header would otherwise sit a little over every photograph.
+      const header = document.querySelector<HTMLElement>('.series-header');
+      const top = header?.offsetHeight ?? 0;
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      window.scrollTo({
+        top: next.y - (top + (window.innerHeight - top) / 2),
+        behavior: still ? 'auto' : 'smooth',
+      });
+    }
+
+    document.addEventListener('keydown', onKey);
+    document.addEventListener(
+      'astro:before-swap',
+      () => document.removeEventListener('keydown', onKey),
+      { once: true },
+    );
+  }
+
   document.addEventListener('astro:page-load', startCounter);
+  document.addEventListener('astro:page-load', startPaging);
 </script>
