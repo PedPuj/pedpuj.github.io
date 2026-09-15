@@ -217,11 +217,18 @@ const next = nextSeriesLine(series);
 
   /* Every photograph is a stop, and so is the line out to the next series
      — without that last one, mandatory snapping would hold the bottom of
-     the page permanently out of reach. */
+     the page permanently out of reach.
+
+     And no stop can be flown past: however hard the flick, one swipe moves
+     one photograph. Without `always` a strong swipe on a phone carried the
+     momentum across several and settled wherever it ran out. (The wheel and
+     the arrows are turned one page at a time by the script below; this is
+     the same rule for a thumb.) */
   .sequence :global(.frame),
   .sequence :global(.pair),
   .next-wrap {
     scroll-snap-align: center;
+    scroll-snap-stop: always;
   }
 
   /* An opening is one page, not two: the frame inside it is the stop, and
