@@ -2,34 +2,44 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
-import { looseFrames } from '../data/catalog';
+import { looseFrames, ratioOf } from '../data/catalog';
+
+const count = looseFrames.length;
 ---
 
 <Base title="Loose" ground="#F5F2EC">
   <SiteHeader />
 
   <main id="main" class="loose">
-    <p class="mono lead">LOOSE — FRAMES THAT DIDN'T MAKE A SERIES</p>
+    <p class="mono lead">LOOSE — {count} {count === 1 ? 'PHOTO' : 'PHOTOS'}, NEWEST FIRST</p>
 
     <div class="sheet">
       {
-        looseFrames.map((frame) => (
-          <a class="thumb" href={frame.href} data-astro-prefetch="hover">
-            {frame.image ? (
-              <Image
-                src={frame.image}
-                alt={frame.slot}
-                widths={[300, 600]}
-                sizes="(max-width: 768px) 33vw, 256px"
-                loading="lazy"
-                data-fade
-                transition:name={frame.id}
-              />
-            ) : (
-              <span class="slot" />
-            )}
-          </a>
-        ))
+        looseFrames.map((frame) => {
+          const ratio = ratioOf(frame);
+          return (
+            <a
+              class="thumb"
+              href={frame.href}
+              data-astro-prefetch="hover"
+              style={`--r: ${ratio}`}
+            >
+              {frame.image ? (
+                <Image
+                  src={frame.image}
+                  alt={frame.slot}
+                  widths={[400, 800]}
+                  sizes="(max-width: 768px) 50vw, 420px"
+                  loading="lazy"
+                  data-fade
+                  transition:name={frame.id}
+                />
+              ) : (
+                <span class="slot" />
+              )}
+            </a>
+          );
+        })
       }
     </div>
   </main>
@@ -45,24 +55,41 @@ import { looseFrames } from '../data/catalog';
     color: var(--ink-2);
   }
 
-  /* The only grid on the site. */
+  /* The only grid on the site: whole photographs, rows of equal height.
+
+     Nothing is cropped. Each thumbnail starts at the row height times its
+     own proportions (--r, read from the file), and the space left at the end
+     of a row is shared out in those same proportions — so every photograph
+     in a row grows by the same factor and they all stay exactly as tall as
+     each other. No script: the rows are the browser's own line-wrapping, and
+     they re-flow on their own at any width.
+
+     The last row would otherwise stretch its two or three photographs across
+     the whole measure. The empty `::after` takes that leftover space
+     instead, so the last row sits at the normal height, left-aligned. */
   .sheet {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    --row: 210px;
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .sheet::after {
+    content: '';
+    flex-grow: 999;
   }
 
   .thumb {
     display: block;
-    aspect-ratio: 3 / 2;
+    flex: var(--r) 1 calc(var(--row) * var(--r));
+    aspect-ratio: var(--r);
     background: var(--block);
-    overflow: hidden;
   }
 
   .thumb :global(img) {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     background: var(--block);
     opacity: 0;
     transition: opacity 400ms ease;
@@ -81,7 +108,8 @@ import { looseFrames } from '../data/catalog';
 
   @media (max-width: 768px) {
     .sheet {
-      grid-template-columns: repeat(3, 1fr);
+      --row: 110px;
+      gap: 6px;
     }
     .loose {
       padding-bottom: 80px;

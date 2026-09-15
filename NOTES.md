@@ -923,9 +923,23 @@ to `site.camera`, exactly as the China scans did. The scan dates (9 and 14
 April) were used to place them in the order, which is only a proxy for when
 they were shot.
 
-**Worth knowing:** the contact sheet crops every thumbnail to 3:2 landscape,
-and 32 of the 45 are uprights, so many thumbnails lose the top and bottom of
-the picture (the full-screen view is uncropped). A design question, not
-changed here.
+## The contact sheet, uncropped
+
+The grid used to crop every thumbnail to 3:2 landscape, and 32 of the 45 are
+uprights, so most lost their top and bottom. Three layouts were shown to Pedro
+as a page of real thumbnails: the crop as it was, rows of equal height, and a
+square of paper per photograph. He chose **rows of equal height**.
+
+It is CSS only. Each thumbnail is `flex: r 1 (row height × r)` with
+`aspect-ratio: r`, where r is read from the file by `ratioOf`. The space left
+at the end of a row is shared out in proportion to r, so every photograph in a
+row grows by the same factor and the row stays one height, exactly. A
+`::after` with `flex-grow: 999` soaks up the last row, which otherwise
+stretches its few photographs across the measure. Row height 210px, 110px on
+a phone. Measured at 1440, 664 and 375 wide: equal heights in every row, flush
+right edges, no sideways scroll.
+
+The lead line was `FRAMES THAT DIDN'T MAKE A SERIES`, which Pedro found
+pretentious. It is now `LOOSE — 45 PHOTOS, NEWEST FIRST`, count derived.
 
 `dist` is now ~300MB. Still well inside GitHub Pages' 1GB.
