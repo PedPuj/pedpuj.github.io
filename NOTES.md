@@ -943,3 +943,30 @@ The lead line was `FRAMES THAT DIDN'T MAKE A SERIES`, which Pedro found
 pretentious. It is now `LOOSE — 45 PHOTOS`, count derived.
 
 `dist` is now ~300MB. Still well inside GitHub Pages' 1GB.
+
+## Opening and closing a Loose photograph (15 Sep 2026)
+
+Pedro, on the phone: opening a photograph from Loose "is not smooth", and
+closing it "flickers a lot, like it refreshes the page". Not reproducible on a
+warm desktop. **Best-guess fix from reading the code, not a proven diagnosis.**
+
+Two causes that only the Loose page has in full:
+
+1. **The morph landed on nothing.** The view transition snapshots the
+   incoming page the instant it is swapped in. A Loose thumbnail (400/800w)
+   and the full-screen view (800/1400/2048w) are different renditions of the
+   file, so the big one is never in the cache yet: the thumbnail morphed into
+   an empty box and the photograph faded in afterwards. Series pages mostly
+   got away with it because the photograph on the page is already large.
+   Now `astro:before-preparation` wraps Astro's `loader`: after the new page
+   is fetched, the photograph the morph lands on (the lightbox image on the
+   way in, the thumbnail you came from on the way out) is fetched and
+   decoded first, capped at one second.
+2. **Twenty lazy thumbnails, all blank on return.** The earlier fix only made
+   the *one* returning image eager. On Loose the whole screen is thumbnails,
+   and every other one refilled square by square. After the scroll restore,
+   every lazy image within a screen of the landing point is now set eager.
+
+Confirmed locally only that nothing broke: the lightbox image is complete at
+swap on a first open, scroll restores exactly, no console errors. Wants
+checking on the iPhone.

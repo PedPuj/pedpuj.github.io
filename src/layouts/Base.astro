@@ -137,10 +137,60 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
   const key = (path: string) => `bedro:scroll:${path}`;
   const isFrame = (path: string) => path.startsWith('/frame/');
 
+  /**
+   * Fetches and decodes a photograph from the incoming page before that page
+   * is shown, giving up after `limit` milliseconds.
+   *
+   * The view transition morphs the picture you tapped into the picture on the
+   * next page, and it takes its snapshot of the next page the instant the
+   * page is swapped in. If that photograph has not arrived yet — and a Loose
+   * thumbnail and the full-screen view are different sizes of the file, so
+   * it never has — the morph lands on an empty box, and the photograph then
+   * fades in on its own. That is the jerk on the way into a photograph, and
+   * on the way back to a page of thumbnails that was never kept in memory.
+   */
+  function ready(source: HTMLImageElement | null, limit: number) {
+    if (!source) return Promise.resolve();
+    const img = new Image();
+    const sizes = source.getAttribute('sizes');
+    const srcset = source.getAttribute('srcset');
+    if (sizes) img.sizes = sizes;
+    if (srcset) img.srcset = srcset;
+    img.src = source.getAttribute('src') ?? '';
+    return Promise.race([
+      img.decode().catch(() => undefined),
+      new Promise((resolve) => window.setTimeout(resolve, limit)),
+    ]);
+  }
+
   document.addEventListener('astro:before-preparation', (event) => {
-    const e = event as unknown as { from: URL; to: URL; navigationType: string };
+    const e = event as unknown as {
+      from: URL;
+      to: URL;
+      navigationType: string;
+      newDocument: Document;
+      loader: () => Promise<void>;
+    };
     cameFrom = e.from.pathname;
     navType = e.navigationType;
+
+    // Hold the page change until the photograph the morph lands on is ready:
+    // the full-screen picture on the way in, the thumbnail you came from on
+    // the way out. A second at most — past that, a slow connection is better
+    // served by moving on and letting the photograph fade in when it comes.
+    const from = e.from.pathname;
+    const to = e.to.pathname;
+    if (isFrame(to) || isFrame(from)) {
+      const load = e.loader;
+      e.loader = async () => {
+        await load();
+        const target = isFrame(to)
+          ? e.newDocument.querySelector<HTMLImageElement>('[data-lightbox] img')
+          : e.newDocument.querySelector<HTMLImageElement>(`a[href="${from}"] img`);
+        await ready(target, 1000);
+      };
+    }
+
     if (!isFrame(cameFrom)) {
       try {
         sessionStorage.setItem(key(cameFrom), String(window.scrollY));
@@ -185,6 +235,21 @@ const vars = `--ground: ${ground}; --accent: ${accent ?? 'var(--ink)'};`;
     const root = document.documentElement;
     root.style.setProperty('scroll-snap-type', 'none');
     window.scrollTo(0, y);
+
+    // Not only the photograph you came back to: on the Loose page there are
+    // twenty-odd thumbnails around it, every one of them lazy, and every one
+    // blank until the browser gets round to them — the whole screen filling
+    // back in, square by square, which reads exactly like a reload. Anything
+    // within a screen of where you land is fetched at once. They were all on
+    // screen a moment ago, so they are in the cache and this costs nothing.
+    const reach = window.innerHeight;
+    document.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => {
+      const box = img.getBoundingClientRect();
+      if (box.bottom > -reach && box.top < window.innerHeight + reach) {
+        img.loading = 'eager';
+      }
+    });
+
     requestAnimationFrame(() => {
       if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
       root.style.removeProperty('scroll-snap-type');
