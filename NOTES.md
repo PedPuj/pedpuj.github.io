@@ -940,6 +940,6 @@ a phone. Measured at 1440, 664 and 375 wide: equal heights in every row, flush
 right edges, no sideways scroll.
 
 The lead line was `FRAMES THAT DIDN'T MAKE A SERIES`, which Pedro found
-pretentious. It is now `LOOSE — 45 PHOTOS, NEWEST FIRST`, count derived.
+pretentious. It is now `LOOSE — 45 PHOTOS`, count derived.
 
 `dist` is now ~300MB. Still well inside GitHub Pages' 1GB.
