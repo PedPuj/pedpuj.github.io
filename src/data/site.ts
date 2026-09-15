@@ -22,15 +22,24 @@ export const site = {
   /** The camera line. Appears on About and in every photo's metadata. */
   camera: 'CANON EOS 500 · 50MM F/1.4',
 
+  /** The cameras on the About page, one per line, each with its lenses. */
+  cameras: [
+    'FUJIFILM X-T5 · 16MM F/1.4 / 27MM F/2.8 / 50MM F/2',
+    'NIKON F3 · 50MM F/1.8',
+    'CANON EOS 500 · 50MM F/1.4',
+    'RICOH GR IV HDF · 18.3MM F/2.8',
+    'CANON CANONET QL17 · 40MM F/1.7',
+  ],
+
   /** The films line on the About page. */
   films: 'PORTRA 400 / GOLD 200 / LUCKY 200 / HP5',
 } as const;
 
 /** The two paragraphs on the About page. */
 export const aboutText = [
-  "I just try to have fun with the camera and learn a bunch of stuff. I look like I'm serious, but really I don't know what to photograph apart from old people, like everyone else.",
-  'Based in Sevilla. Mostly film, mostly street. I shoot in series because a single photograph rarely says enough on its own, and because I like the way a sequence forces me to make decisions.',
+  'Intento hacer cosas con la cámara. Aunque no tenga mucha idea, pruebo a aprender algo. A veces las fotos son un poco intensas, pero en verdá no tengo ni idea de qué fotografiar además de viejos y gente de espaldas.',
+  'Vivo en Sevilla y casi siempre quiero usar carrete, pero están mu caro.',
 ] as const;
 
-/** Describes the photo of you on the About page, until the real one is added. */
-export const aboutPhotoSlot = 'Portrait of the photographer — vertical, waist up';
+/** Describes the photo of you on the About page, for people who can't see it. */
+export const aboutPhotoSlot = 'Yo con una Nikon F3 en una mano y una varita de incienso en la otra';

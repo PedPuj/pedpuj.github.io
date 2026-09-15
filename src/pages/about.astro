@@ -10,7 +10,7 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
   <SiteHeader />
 
   <main id="main" class="about">
-    <div class="portrait">
+    <div class="portrait" lang="es">
       {
         aboutImage ? (
           <Image
@@ -29,11 +29,11 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
       }
     </div>
 
-    <div class="text">
+    <div class="text" lang="es">
       {aboutText.map((paragraph) => <p>{paragraph}</p>)}
 
       <div class="mono contact">
-        <span>{site.camera}</span>
+        {site.cameras.map((camera) => <span>{camera}</span>)}
         <span>{site.films}</span>
         <span>{site.email.toUpperCase()}</span>
       </div>
@@ -108,6 +108,13 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
     border-top: 1px solid var(--hairline);
     color: var(--ink-2);
     line-height: 2;
+  }
+
+  /* A line too long for a narrow column wraps with a hanging indent,
+     so the Fuji's third lens doesn't read as a camera of its own. */
+  .contact span {
+    padding-left: 2ch;
+    text-indent: -2ch;
   }
 
   .links {
