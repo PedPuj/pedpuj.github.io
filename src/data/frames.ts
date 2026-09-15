@@ -157,7 +157,8 @@ export const series: SeriesInput[] = [
     ground: '#FBFAF7',
     counterColor: '#8C877E',
     treatment: 'bare',
-    // The trip ends where it began, so Tokyo is a chapter twice. The two
+    // The trip ended back in Tokyo, but those days are folded into the one
+    // Tokyo chapter, before the station and the train out. The two
     // frames at Odawara are the train between Hakone and Kyoto: they belong
     // to no city, so the page runs straight through them.
     chapters: {
@@ -186,6 +187,11 @@ export const series: SeriesInput[] = [
       { file: 'dscf9789.jpg', slot: 'Man at a machine in the workshop', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
       { file: 'dscf9936.jpg', slot: 'Shop walls of stacked bowls', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
       { file: 'dscf9946.jpg', slot: 'Pale green hydrangea', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf0963.jpg', slot: 'Schoolboys walking up the lane', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1020.jpg', slot: 'Crow on the letter C, National Stadium', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1041.jpg', slot: 'Worker resting on the scaffolding', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1142.jpg', slot: 'Tradesman\'s van, every tool in its place', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1045.jpg', slot: 'Skytree disappearing into fog', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
       { file: 'dscf9973.jpg', slot: 'Tokyo Banana counter, the smile', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
       { file: 'dscf9978.jpg', slot: 'Passers-by blurring past a station shop', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
       { file: 'dscf9983.jpg', slot: 'Feet and a suitcase crossing the stone floor', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
@@ -224,12 +230,6 @@ export const series: SeriesInput[] = [
       { file: 'dscf0911.jpg', slot: 'Red Ferris wheel on the roof, Umeda', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'OSAKA', year: 2025 },
       { file: 'dscf0928.jpg', slot: 'Neon through a gap in the building, night', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'OSAKA', year: 2025 },
 
-      // ── Tokyo, again ────────────────────────────────────────
-      { file: 'dscf0963.jpg', slot: 'Schoolboys walking up the lane', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
-      { file: 'dscf1020.jpg', slot: 'Crow on the letter C, National Stadium', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'TOKYO', year: 2025 },
-      { file: 'dscf1041.jpg', slot: 'Worker resting on the scaffolding', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
-      { file: 'dscf1142.jpg', slot: 'Tradesman\'s van, every tool in its place', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
-      { file: 'dscf1045.jpg', slot: 'Skytree disappearing into fog', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
     ],
   },
 ];

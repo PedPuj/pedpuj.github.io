@@ -861,12 +861,13 @@ placeholder slots. All Fujifilm X-T5 (16mm f/1.4, 27mm f/2.8, 50mm f/2, read
 with `mdls`), shot 5–18 October 2025.
 
 **Sequence.** Chronological, told in chapters like China: Tokyo (19) → Hakone
-(5) → two frames at Odawara station → Kyoto (15) → Osaka (4) → Tokyo (5). It
-opens on the Skytree in sun and closes on it in fog. Six pairs: arcade boy +
+(5) → two frames at Odawara station → Kyoto (15) → Osaka (4). The last days back in
+Tokyo were first a second Tokyo chapter; Pedro wanted the city named once, so
+they now sit inside the Tokyo chapter, just before Tokyo Station. Six pairs: arcade boy +
 rickshaw, crates + workshop, two Hakone conductors, maiko + geiko, schoolkids +
 old man, the two Amerikamura frames.
 
-**Tokyo twice.** A chapter is a run of one place, so a place can recur. The
+**A place twice.** (Built for the first version, kept.) A chapter is a run of one place, so a place can recur. The
 rail used to light every link with the current *place*, which would have lit
 both Tokyos; frames, chapter marks and rail links now also carry the chapter
 number (`data-leg`) and the rail answers to that. The corner name and paper
