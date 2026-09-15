@@ -151,25 +151,85 @@ export const series: SeriesInput[] = [
   {
     slug: 'japan',
     title: 'Japan',
-    places: 'TOKYO, OSAKA, KYOTO',
+    places: 'TOKYO, HAKONE, KYOTO, OSAKA',
     year: 2025,
     accent: null,
     ground: '#FBFAF7',
     counterColor: '#8C877E',
     treatment: 'bare',
-    cover: { file: 'cover.jpg', slot: 'Japan cover — quiet street, wide horizontal' },
+    // The trip ends where it began, so Tokyo is a chapter twice. The two
+    // frames at Odawara are the train between Hakone and Kyoto: they belong
+    // to no city, so the page runs straight through them.
+    chapters: {
+      TOKYO: { name: 'Tokyo', local: '東京', ground: '#F9F9F7' },
+      HAKONE: { name: 'Hakone', local: '箱根', ground: '#F8F9F4' },
+      KYOTO: { name: 'Kyoto', local: '京都', ground: '#FBF8F2' },
+      OSAKA: { name: 'Osaka', local: '大阪', ground: '#FAF7F4' },
+    },
+    cover: { file: 'dscf9263.jpg', slot: 'Skytree standing over the rooftops, blue sky' },
     next: 'china',
     frames: [
-      { file: 'japan-01.jpg', slot: 'Commuters, Osaka — horizontal, Gold 200', orientation: 'h', film: 'KODAK GOLD 200', place: 'OSAKA', year: 2025 },
-      { file: 'japan-02.jpg', slot: 'Vending machines at night — vertical', orientation: 'v', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025, pair: true },
-      { file: 'japan-03.jpg', slot: 'Salaryman asleep on a train — vertical', orientation: 'v', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025 },
-      { file: 'japan-04.jpg', slot: 'Kyoto backstreet, wires — horizontal', orientation: 'h', film: 'KODAK GOLD 200', place: 'KYOTO', year: 2025 },
-      { file: 'japan-05.jpg', slot: 'Woman sweeping a shop front — vertical', orientation: 'v', film: 'KODAK GOLD 200', place: 'KYOTO', year: 2025 },
-      { file: 'japan-06.jpg', slot: 'Crossing in the rain — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025 },
-      { file: 'japan-07.jpg', slot: 'Kissaten counter, two customers — horizontal', orientation: 'h', film: 'KODAK GOLD 200', place: 'OSAKA', year: 2025, pair: true },
-      { file: 'japan-08.jpg', slot: 'Hand on a handrail — vertical', orientation: 'v', film: 'KODAK GOLD 200', place: 'OSAKA', year: 2025 },
-      { file: 'japan-09.jpg', slot: 'Shrine steps, no people — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: 'KYOTO', year: 2025 },
-      { file: 'japan-10.jpg', slot: 'Last train platform — horizontal', orientation: 'h', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025 },
+      // ── Tokyo ───────────────────────────────────────────────
+      { file: 'dscf9263.jpg', slot: 'Skytree standing over the rooftops, blue sky', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9396.jpg', slot: 'Shinjuku towers behind the station lamps', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9385.jpg', slot: 'Shinjuku building from below, signs up the corner', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9425.jpg', slot: 'Docomo tower framed by dark trees', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9731.jpg', slot: 'Train smearing past the platform doors', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9686.jpg', slot: 'Escalator crowd dissolving into blur', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9761.jpg', slot: 'Commuter reading at the train door', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9826.jpg', slot: 'Pagoda roofs through the leaves, Asakusa', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9962.jpg', slot: 'Silver tanuki in a red shrine box, Asakusa', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9797.jpg', slot: 'Schoolboy looking back down the arcade', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025, pair: true },
+      { file: 'dscf9965.jpg', slot: 'Two men pulling a rickshaw', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9915.jpg', slot: 'Kissaten with a green awning and a bicycle', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9804.jpg', slot: 'Yellow crates stacked down the back lane', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025, pair: true },
+      { file: 'dscf9789.jpg', slot: 'Man at a machine in the workshop', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9936.jpg', slot: 'Shop walls of stacked bowls', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9946.jpg', slot: 'Pale green hydrangea', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9973.jpg', slot: 'Tokyo Banana counter, the smile', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9978.jpg', slot: 'Passers-by blurring past a station shop', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf9983.jpg', slot: 'Feet and a suitcase crossing the stone floor', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+
+      // ── Hakone ──────────────────────────────────────────────
+      { file: 'dscf0116.jpg', slot: 'Conductor rushing past the mountain train window', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'HAKONE', year: 2025 },
+      { file: 'dscf0121.jpg', slot: 'Conductor through the train window, stickers on the glass', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'HAKONE', year: 2025, pair: true },
+      { file: 'dscf0123.jpg', slot: 'Two conductors at the switchback', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'HAKONE', year: 2025 },
+      { file: 'dscf0098.jpg', slot: 'Pink vending machine in the woods', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'HAKONE', year: 2025 },
+      { file: 'dscf0160.jpg', slot: 'Owakudani, steam over the sulphur slope', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'HAKONE', year: 2025 },
+
+      // ── Odawara, between ────────────────────────────────────
+      { file: 'dscf0340.jpg', slot: 'Transfer signs down the station corridor', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'ODAWARA', year: 2025 },
+      { file: 'dscf0342.jpg', slot: 'Shinkansen guard leaning from his window', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'ODAWARA', year: 2025 },
+
+      // ── Kyoto ───────────────────────────────────────────────
+      { file: 'dscf0349.jpg', slot: 'Yellow nursery bus at a crossing', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0364.jpg', slot: 'Postman at his scooter', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0372.jpg', slot: 'Woman passing a temple gate', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0393.jpg', slot: 'Maiko walking away, orange obi', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025, pair: true },
+      { file: 'dscf0412.jpg', slot: 'Geiko hurrying past, a blur in black and white', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0399.jpg', slot: 'Man sitting with the street cats', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0392.jpg', slot: 'Takoyaki cook at his trays', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0394.jpg', slot: 'Kitchen pass, faces behind the slats', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0445.jpg', slot: 'Police box lit red at night', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0447.jpg', slot: 'Children in helmets walking to school', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025, pair: true },
+      { file: 'dscf0492.jpg', slot: 'Old man stopping on the corner', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0503.jpg', slot: 'Tram driver in cap and mask', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0531.jpg', slot: 'Old man hanging laundry in the bamboo', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0579.jpg', slot: 'Strings of paper cranes', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'KYOTO', year: 2025 },
+      { file: 'dscf0648.jpg', slot: 'Red train seen through the carriage window', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'KYOTO', year: 2025 },
+
+      // ── Osaka ───────────────────────────────────────────────
+      { file: 'dscf0832.jpg', slot: 'Statue of Liberty on a rooftop, wires below', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'OSAKA', year: 2025, pair: true },
+      { file: 'dscf0833.jpg', slot: 'Black winged figure painted on a wall', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'OSAKA', year: 2025 },
+      { file: 'dscf0911.jpg', slot: 'Red Ferris wheel on the roof, Umeda', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'OSAKA', year: 2025 },
+      { file: 'dscf0928.jpg', slot: 'Neon through a gap in the building, night', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'OSAKA', year: 2025 },
+
+      // ── Tokyo, again ────────────────────────────────────────
+      { file: 'dscf0963.jpg', slot: 'Schoolboys walking up the lane', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 16MM F/1.4', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1020.jpg', slot: 'Crow on the letter C, National Stadium', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1041.jpg', slot: 'Worker resting on the scaffolding', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1142.jpg', slot: 'Tradesman\'s van, every tool in its place', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
+      { file: 'dscf1045.jpg', slot: 'Skytree disappearing into fog', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'TOKYO', year: 2025 },
     ],
   },
 ];

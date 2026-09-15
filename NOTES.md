@@ -851,3 +851,38 @@ behaviour that took three attempts to get right, so it was left alone here.
 line, exactly like `pair`. This is the "asymmetric editorial grid" that earlier
 notes set aside as needing a decision per photograph. It doesn't: it needs a
 decision on six or seven frames per series and the rest inherit.
+
+---
+
+# The Japan edit (15 Sep 2026)
+
+50 frames from `~/Documents/Photography/Portfolio/Japan`, replacing the ten
+placeholder slots. All Fujifilm X-T5 (16mm f/1.4, 27mm f/2.8, 50mm f/2, read
+with `mdls`), shot 5–18 October 2025.
+
+**Sequence.** Chronological, told in chapters like China: Tokyo (19) → Hakone
+(5) → two frames at Odawara station → Kyoto (15) → Osaka (4) → Tokyo (5). It
+opens on the Skytree in sun and closes on it in fog. Six pairs: arcade boy +
+rickshaw, crates + workshop, two Hakone conductors, maiko + geiko, schoolkids +
+old man, the two Amerikamura frames.
+
+**Tokyo twice.** A chapter is a run of one place, so a place can recur. The
+rail used to light every link with the current *place*, which would have lit
+both Tokyos; frames, chapter marks and rail links now also carry the chapter
+number (`data-leg`) and the rail answers to that. The corner name and paper
+colour still answer to the place.
+
+**Odawara** is deliberately not a chapter: the transfer sign and the
+shinkansen guard are the journey between cities, so the page runs straight
+through them with no city named.
+
+**Files.** Lowercased camera stems. Three sources were 5–8k pixels (up to
+27MB); shrunk to 3072px long edge — the largest rendition the site makes is
+2048px. `dscf9385.jpg` was exported sideways (signs reading vertically) and
+was turned upright.
+
+**Guessed, to confirm with Pedro:** places read off pictures and dates. Tokyo,
+Hakone, Kyoto and Osaka are certain from landmarks (Skytree, Asakusa,
+Owakudani, Gion, HEP Five, Amerikamura) and GPS on two frames. Least certain:
+the red-train window (`dscf0648`, filed under Kyoto) and the night neon
+(`dscf0928`, filed under Osaka).

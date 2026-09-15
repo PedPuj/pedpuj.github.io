@@ -150,7 +150,7 @@ write them here — so re-ordering the edit re-orders the journey on its own. A
 city's chapter is however many photographs of it sit together in a row.
 
 Leave `chapters:` out of a series entirely and nothing changes: the sequence
-runs straight through, as Japan does.
+runs straight through.
 
 **Until a file exists, its place on the site shows as a flat grey block** with a
 note telling you which file is missing. That is deliberate — you can lay out the

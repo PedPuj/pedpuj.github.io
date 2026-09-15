@@ -45,6 +45,10 @@ export interface Frame {
   orientation: Orientation;
   /** Where it was taken, as written in frames.ts. Null when not given. */
   place: string | null;
+  /** Which chapter of its series this frame is in, 1-based. Null outside
+      any chapter. A place can come round twice — a trip that ends where it
+      began — so the chapter, not the place, says which one you are in. */
+  chapter: number | null;
   metadata: string;
   /** True when this frame sits side by side with the next one. */
   pair: boolean;
@@ -86,6 +90,7 @@ function build(collection: string, inputs: FrameInput[]): Frame[] {
       file: f.file,
       orientation: f.orientation,
       place: f.place ?? null,
+      chapter: null,
       metadata: metadataLine(f),
       pair: f.pair === true,
       href: `/frame/${id}/`,
@@ -141,6 +146,7 @@ function chaptersOf(
     });
   }
   for (const chapter of out) {
+    for (const frame of chapter.frames) frame.chapter = chapter.index;
     chapter.from = chapter.frames[0].index;
     chapter.to = chapter.frames[chapter.frames.length - 1].index;
     const n = chapter.frames.length;

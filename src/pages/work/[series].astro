@@ -333,8 +333,8 @@ const next = nextSeriesLine(series);
 
     // The cities this series is actually told in, and the paper each one is
     // printed on, read off the chapter marks themselves. Both are empty on a
-    // series without chapters — Japan moves between three cities every other
-    // frame, and naming them in the corner would only flicker.
+    // series without chapters, where naming a city in the corner that changes
+    // every other frame would only flicker.
     const chaptered = new Set<string>();
     const grounds = new Map<string, string>();
     for (const mark of marks) {
@@ -347,20 +347,28 @@ const next = nextSeriesLine(series);
     const base = root.style.getPropertyValue('--ground');
 
     let shownPlace: string | null = null;
+    let shownLeg: string | null = null;
 
-    function showPlace(place: string | undefined) {
-      const value = place ?? null;
-      if (value === shownPlace) return;
-      shownPlace = value;
+    // The name in the corner and the paper answer to the place; the mark in
+    // the rail answers to the chapter, because a place can come round twice.
+    function showPlace(el: HTMLElement | null | undefined) {
+      const place = el?.dataset.place;
+      const inChapter = Boolean(place && chaptered.has(place) && el?.dataset.leg);
+      const value = inChapter ? place! : null;
+      const leg = inChapter ? el!.dataset.leg! : null;
 
-      if (placeOut) placeOut.textContent = value ? `${value} · ` : '';
-
-      if (grounds.size > 0) {
-        root.style.setProperty('--ground', (value && grounds.get(value)) || base);
+      if (value !== shownPlace) {
+        shownPlace = value;
+        if (placeOut) placeOut.textContent = value ? `${value} · ` : '';
+        if (grounds.size > 0) {
+          root.style.setProperty('--ground', (value && grounds.get(value)) || base);
+        }
       }
 
-      for (const city of document.querySelectorAll<HTMLElement>('.rail [data-place]')) {
-        const here = city.dataset.place === value;
+      if (leg === shownLeg) return;
+      shownLeg = leg;
+      for (const city of document.querySelectorAll<HTMLElement>('.rail [data-leg]')) {
+        const here = city.dataset.leg === leg;
         city.classList.toggle('is-current', here);
         if (here) city.setAttribute('aria-current', 'true');
         else city.removeAttribute('aria-current');
@@ -371,8 +379,7 @@ const next = nextSeriesLine(series);
       if (!el) return;
       const index = el.dataset.index;
       if (index) number.textContent = `${pad(index)} / ${total}`;
-      const place = el.dataset.place;
-      showPlace(place && chaptered.has(place) ? place : undefined);
+      showPlace(el);
     }
 
     const observer = new IntersectionObserver(
@@ -411,9 +418,7 @@ const next = nextSeriesLine(series);
       show(nearest(frames));
       // A chapter mark can be closer than any photograph, and when it is,
       // it is the city you have just arrived in that should be named.
-      const marker = nearest([...frames, ...marks]);
-      const place = marker?.dataset.place;
-      showPlace(place && chaptered.has(place) ? place : undefined);
+      showPlace(nearest([...frames, ...marks]));
     }
 
     let settle = 0;

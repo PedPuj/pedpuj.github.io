@@ -63,6 +63,7 @@ const number = String(frame.index).padStart(3, '0');
   data-frame
   data-index={frame.index}
   data-place={frame.place ?? undefined}
+  data-leg={frame.chapter ?? undefined}
   id={anchor ? `f${frame.index}` : undefined}
 >
   <Tag class="target" {...attrs}>
