@@ -887,3 +887,45 @@ Hakone, Kyoto and Osaka are certain from landmarks (Skytree, Asakusa,
 Owakudani, Gion, HEP Five, Amerikamura) and GPS on two frames. Least certain:
 the red-train window (`dscf0648`, filed under Kyoto) and the night neon
 (`dscf0928`, filed under Osaka).
+
+---
+
+# The Loose photographs (15 Sep 2026)
+
+45 frames from `~/Documents/Photography/Portfolio/Loose`, replacing the fifteen
+placeholder slots. Newest first, as the list has always said, by capture date.
+
+| Source | Count | EXIF |
+|---|---|---|
+| Ricoh GR IV HDF, 18.3mm f/2.8 | 21 | full |
+| Fujifilm X-T5, XF 27mm / XF 50mm | 11 | full |
+| iPhone 15 Pro Max | 3 | full, with GPS |
+| Film scans (`IMG_7172`–`IMG_7353`, 2048 × 1372) | 10 | **none** |
+
+**Files.** Camera stems, lowercased; the Ricoh exports carried a timestamp
+prefix (`1779267515000_R0000053.jpg`), dropped to `r0000053.jpg`. The Fuji
+frames named `IMG_70xx` are X-T5 files exported under another name — the EXIF
+says so — and became `img7055.jpg` etc. `src/images/loose/.gitkeep` went, the
+folder is no longer empty.
+
+**Certain places:** Turin (Piazza San Carlo's twin churches, a carabiniere),
+Porto (Santo Ildefonso, the Coliseu), Sevilla (GPS on `dscf2058`, the Alameda
+columns on `dscf3941`), Chipiona (GPS on the three iPhone frames, the stone
+fishing weirs).
+
+**Guessed, to confirm with Pedro:** `r0000371` (orange building) is filed
+under Turin only because it was shot the next day. The January Fuji frames
+are filed under Sevilla from one legible sign. Everything else carries no
+place rather than an invented one — the concert (`PERREO`), the donkeys, the
+sardines, the dawn beach, and all ten film scans. Their film is the
+placeholder `COLOUR NEGATIVE` / `B&W NEGATIVE`, and their camera falls back
+to `site.camera`, exactly as the China scans did. The scan dates (9 and 14
+April) were used to place them in the order, which is only a proxy for when
+they were shot.
+
+**Worth knowing:** the contact sheet crops every thumbnail to 3:2 landscape,
+and 32 of the 45 are uprights, so many thumbnails lose the top and bottom of
+the picture (the full-screen view is uncropped). A design question, not
+changed here.
+
+`dist` is now ~300MB. Still well inside GitHub Pages' 1GB.

@@ -239,19 +239,60 @@ export const series: SeriesInput[] = [
  * This one IS ordered newest first: put new photographs at the TOP.
  */
 export const loose: FrameInput[] = [
-  { file: 'loose-01.jpg', slot: 'Dog in a doorway', orientation: 'h', film: 'KODAK GOLD 200', place: 'SEVILLA', year: 2026 },
-  { file: 'loose-02.jpg', slot: 'Bus window reflection', orientation: 'h', film: 'KODAK GOLD 200', place: 'SEVILLA', year: 2026 },
-  { file: 'loose-03.jpg', slot: 'Two chairs, no people', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2026 },
-  { file: 'loose-04.jpg', slot: 'Laundry on a balcony', orientation: 'v', film: 'KODAK PORTRA 400', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-05.jpg', slot: 'Man reading a paper', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-06.jpg', slot: 'Wet street, headlights', orientation: 'h', film: 'KODAK PORTRA 400', place: 'TOKYO', year: 2025 },
-  { file: 'loose-07.jpg', slot: 'Hands, cigarette', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-08.jpg', slot: 'Shop cat', orientation: 'h', film: 'LUCKY 200', place: 'SHANGHAI', year: 2026 },
-  { file: 'loose-09.jpg', slot: 'Queue at a bakery', orientation: 'h', film: 'KODAK GOLD 200', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-10.jpg', slot: 'Bench, back of a head', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-11.jpg', slot: 'Scooter and shadow', orientation: 'h', film: 'KODAK GOLD 200', place: 'OSAKA', year: 2025 },
-  { file: 'loose-12.jpg', slot: 'Umbrella, blurred', orientation: 'h', film: 'KODAK PORTRA 400', place: 'KYOTO', year: 2025 },
-  { file: 'loose-13.jpg', slot: 'Fruit crates', orientation: 'h', film: 'LUCKY 200', place: "XI'AN", year: 2026 },
-  { file: 'loose-14.jpg', slot: 'Barber shop mirror', orientation: 'h', film: 'ILFORD HP5 PLUS 400', place: 'SEVILLA', year: 2025 },
-  { file: 'loose-15.jpg', slot: 'Empty plaza, midday', orientation: 'h', film: 'KODAK GOLD 200', place: 'SEVILLA', year: 2025 },
+  // ── August ───────────────────────────────────────────────
+  { file: 'img9598.jpg', slot: 'The lighthouse across the water', orientation: 'v', gear: 'IPHONE 15 PRO MAX', place: 'CHIPIONA', year: 2026 },
+  { file: 'img9596.jpg', slot: 'Two fishermen on the stone weir, rod against the sky', orientation: 'v', gear: 'IPHONE 15 PRO MAX', place: 'CHIPIONA', year: 2026 },
+  { file: 'img9588.jpg', slot: 'One man sitting out on the weir', orientation: 'v', gear: 'IPHONE 15 PRO MAX', place: 'CHIPIONA', year: 2026 },
+  { file: 'r0002064.jpg', slot: 'Broken concrete in the tide', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0002055.jpg', slot: 'The sea through a doorway at dawn', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0002026.jpg', slot: 'Campervans under the first light', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+
+  // ── July ─────────────────────────────────────────────────
+  { file: 'r0001969.jpg', slot: 'Woman on a balcony above the kebab shop', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001885.jpg', slot: 'Donkey with its nose in a yellow bucket', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001855.jpg', slot: 'White hen jumping off the hay', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001846.jpg', slot: 'Donkey leaning over the green gate', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+
+  // ── June ─────────────────────────────────────────────────
+  { file: 'r0001396.jpg', slot: 'Rows of red stadium seats', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001354.jpg', slot: 'Red hibiscus', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001317.jpg', slot: 'Dry grass lying down in the wind', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0001241.jpg', slot: 'Sardines on skewers over the fire', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'dscf3982.jpg', slot: 'Two glasses on the table, night', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'SEVILLA', year: 2026 },
+  { file: 'dscf3941.jpg', slot: 'Statue on its column against the evening, Alameda', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 50MM F/2', place: 'SEVILLA', year: 2026 },
+  { file: 'r0000984.jpg', slot: 'A plane over the empty car park', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+
+  // ── May ──────────────────────────────────────────────────
+  { file: 'r0000962.jpg', slot: 'PERREO in red letters across the stadium', orientation: 'h', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0000878.jpg', slot: 'The crowd under the floodlights, a Puerto Rican flag', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0000550.jpg', slot: 'Cook on his break in a doorway', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', year: 2026 },
+  { file: 'r0000371.jpg', slot: 'Orange building against a blue sky', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+  { file: 'r0000127.jpg', slot: 'Woman crossing the light, seen through the door', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+  { file: 'r0000124.jpg', slot: 'Old man reading on a bench, Piazza San Carlo', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+  { file: 'r0000119.jpg', slot: 'The twin churches through the arcade', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+  { file: 'r0000064.jpg', slot: 'Buying flowers at the market', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+  { file: 'r0000053.jpg', slot: 'Carabiniere on his phone, a woman walking away', orientation: 'v', gear: 'RICOH GR IV HDF · 18.3MM F/2.8', place: 'TURIN', year: 2026 },
+
+  // ── April ────────────────────────────────────────────────
+  { file: 'img7353.jpg', slot: 'Three bakers filling the tray', orientation: 'h', film: 'B&W NEGATIVE', year: 2026 },
+  { file: 'img7337.jpg', slot: 'RUN and RELAX, a dark corridor', orientation: 'h', film: 'B&W NEGATIVE', year: 2026 },
+  { file: 'img7258.jpg', slot: 'A ring of lights on the ceiling', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7257.jpg', slot: 'Lasers over the hall', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7244.jpg', slot: 'The whole room gone pink', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7238.jpg', slot: 'Holes in the ceiling, sparks of light', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7219.jpg', slot: 'Men at the vans, the street carpeted in flowers', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7214.jpg', slot: 'The paso going by, a head in the way', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7202.jpg', slot: 'The castle on the hill between two white walls', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7172.jpg', slot: 'The band on a pink stage, screens either side', orientation: 'h', film: 'COLOUR NEGATIVE', year: 2026 },
+  { file: 'img7055.jpg', slot: 'Café, table lamps and coloured glass', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'PORTO', year: 2026 },
+  { file: 'img7089.jpg', slot: 'Tiled house and a parked car on the cobbles', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'PORTO', year: 2026 },
+  { file: 'img7093.jpg', slot: 'Santo Ildefonso in the evening sun', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'PORTO', year: 2026 },
+  { file: 'img7098.jpg', slot: 'The Coliseu tower against a blue sky', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'PORTO', year: 2026 },
+  { file: 'img7104.jpg', slot: 'A narrow gap of light, people walking below', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'PORTO', year: 2026 },
+
+  // ── February and January ─────────────────────────────────
+  { file: 'dscf2058.jpg', slot: 'Two figures on the roof edge', orientation: 'h', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'SEVILLA', year: 2026 },
+  { file: 'dscf1793.jpg', slot: 'Man waiting in the shadow by a lit window', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'SEVILLA', year: 2026 },
+  { file: 'dscf1736.jpg', slot: 'Man looking in a shop window, someone blurring past', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'SEVILLA', year: 2026 },
+  { file: 'dscf1732.jpg', slot: 'Shoe shop door, people blurring in and out', orientation: 'v', gear: 'FUJIFILM X-T5 · XF 27MM F/2.8', place: 'SEVILLA', year: 2026 },
 ];
