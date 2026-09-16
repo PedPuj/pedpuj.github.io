@@ -73,7 +73,7 @@ Six kinds of page:
 | `/work/workers`, `/work/china`, `/work/japan` | A series, read one frame at a time, top to bottom. |
 | `/loose` | The contact sheet — everything that didn't make a series. |
 | `/frame/china-004` | One photograph full screen on black, with its film and camera details. Arrow keys move between frames, Escape closes. |
-| `/about` | You, your kit, and two links. |
+| `/about` | You, the two paragraphs in Spanish, and your napkin. |
 
 ---
 
@@ -156,8 +156,47 @@ runs straight through.
 note telling you which file is missing. That is deliberate — you can lay out the
 whole sequence first and fill it in later.
 
-Your name, email, Instagram, camera and film list live in **`src/data/site.ts`**.
+Your name, email, Instagram and camera live in **`src/data/site.ts`**.
 Same idea: change the words between the quote marks, nothing else.
+
+### The napkin on the About page
+
+The About page prints a bar napkin, and everything printed on it is in that
+same file, lower down, under `servilleta`:
+
+| The bit | What it is | On a real napkin |
+|---|---|---|
+| `entradilla` | The line that introduces the list | *Selecta cocina con las especialidades:* |
+| `especialidades` | What the house serves, one line per printed line | *Berenjenas, paellas, croquetas…* |
+| `promesas` | The ticked promises, in pairs — first one ticks on the left, second on the right | *✔ Bebidas Finas · Buen Servicio ✔* |
+| `camaras` | The cameras, printed small in the empty half, where a bar puts its addresses | *Santa Clotilde, 9 - Tlf. 958 284 710* |
+| `lema` | The line just outside the box | *Ambiente muy Grato - Local Climatizado* |
+| `ciudad` | Signed at the foot, with a rule under it | *Granada* |
+
+The lower half of the napkin is deliberately almost empty. Nothing else goes
+there — that emptiness is most of what makes it look like a napkin. If you
+have more to say, it goes in `interior`, inside the fold.
+
+**The napkin does three things**, and none of them needs a button:
+
+- **Somebody writes on it.** Put the mouse on it — or touch it, on a phone —
+  and `nota` is written across the corner in biro, left to right, at the speed
+  of a hand. It stays written.
+- **It never falls the same way twice.** On every visit it lies at a slightly
+  different angle, and the printing lands on the sheet a hair differently.
+  Nothing to set; it just does it.
+- **You can unfold it.** The bottom of the napkin is folded up over the front
+  — that is the line you can see across the middle. Click it (on a phone,
+  touch it a second time) and that flap comes down about the fold at the
+  bottom edge, and the inside of the napkin is underneath. Click again to
+  fold it back up.
+| `nota` | What somebody wrote on it in biro | *a phone number, in a bar* |
+| `interior` | What is printed inside the fold — only seen when the napkin is opened | |
+| `tinta` | The ink the printer had that week: `'verde'`, `'azul'` or `'roja'` | |
+
+**Keep the lines short.** A napkin is narrow and the type is fat, so a long
+line will make the whole thing shrink to fit. Write them the way a bar writes
+them — flat, confident, and slightly unprovable.
 
 ---
 

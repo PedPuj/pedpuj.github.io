@@ -970,3 +970,165 @@ Two causes that only the Loose page has in full:
 Confirmed locally only that nothing broke: the lightbox image is complete at
 swap on a first open, scroll restores exactly, no console errors. Wants
 checking on the iPhone.
+
+# La servilleta (16 Sep 2026)
+
+The About page used to end in a mono list: five cameras, a films line, an
+email, and two underlined links. Correct, and dead. It is now a **Spanish bar
+napkin** — the thin printed kind from the dispenser next to the olives — with
+everything that list used to say printed on it.
+
+Pedro brought two real ones as references: **Bar Corder** (Gata de Gorgos,
+blue, with a lobster and a crab drawn on it) and **Los Pipos** (Granada,
+green). The second is what the component is built from, and the design is
+copied from the object rather than invented:
+
+- **A plain white rectangle, taller than wide (5:7).** No border, no ornament
+  at the edges. The paper is blank and the ink does everything.
+- **The fold runs across it, not down it.** The first attempt had a folded
+  flap down the right-hand side; Pedro cut it — on both real napkins the
+  crease is horizontal, the lower half is a hair wider than the upper, and
+  that half-millimetre mismatch is the only thing that gives the fold away.
+  The crease sits at 60%, just below the strapline, so it never runs through
+  a line of type.
+- **One ink, printed badly.** An `feTurbulence` + `feDisplacementMap` filter
+  pushes the ink's edges around, and the whole print block sits a hair rotated
+  and a hair left of square on the sheet, because cheap offset never lands
+  straight. A browser that declines the filter just prints it clean.
+- **A heavy ruled box** with a hairline just inside it, holding the name, what
+  the house serves, and the ticked promises in two columns facing their own
+  margins. The strapline sits just *outside* the box, as on Los Pipos.
+- **The town signed at the foot** in a script, with a rule under it.
+
+Every printed word lives in `servilleta` in `src/data/site.ts`, in the same
+shape a bar would use: `entradilla`, `especialidades`, `promesas`, `lema`,
+`kit`, `ciudad`, `tinta`. The ink is one word — `verde`, `azul` or `roja`.
+
+Sizes inside the napkin are all `cqw`, shares of its own width, so it is the
+same printing at any size rather than a layout that reflows.
+
+`site.cameras` and `site.films` were **deleted**: the kit is printed on the
+napkin now, and it is printed in exactly one place. `site.instagramHandle`
+was added so the handle can be printed without the URL around it. The two
+printed contact lines are the real `mailto:` and Instagram links — nothing
+marks them until the pointer is on them, because a napkin has no underlines.
+
+Three typefaces arrived with it, self-hosted like the other two and used on
+this one page: **Oswald** (variable, 21 KB, the name and the lists),
+**Tinos** (Times metric-compatible, 12 KB, the ticked lines) and
+**Yellowtail** (18 KB, the one word "Sevilla"). They are deliberately *not*
+preloaded in the layout — only About needs them, and the page is readable in
+Times and Helvetica while they arrive.
+
+## The napkin loses its kit, and the page gets a table (16 Sep 2026)
+
+Two things came out of looking at the finished page.
+
+**The films came off the napkin.** The cameras and the films were printed in
+the lower half, where Los Pipos prints its two addresses. Pedro wanted the
+film stocks gone — "don't give anything and it makes it too crowded" — and
+the cameras kept; the first pass took both out and had to put the cameras
+back. `servilleta.kit` became `servilleta.camaras`, two lines instead of
+three. The lower half is now the cameras, the two contact lines and the town,
+with the gap the napkin needs above them.
+
+**The page is a table, not a column.** Four arrangements were drawn at true
+desktop proportions and shown as a page he could judge by eye; he took the
+fourth. The portrait and the napkin are now one object: the photograph at the
+left of a seven-column block, the napkin put down over its bottom-right
+corner, overlapping, and the two paragraphs in a column to the right of both.
+The napkin is `position: absolute` inside `.mesa`, which carries 40px of
+bottom padding so the pair never spills onto anything below.
+
+**On a phone the portrait is not shown at all** — the words and the napkin are
+the whole page. The portrait's `loading` changed from `eager` to `lazy` for
+exactly that reason: a hidden lazy image is never fetched, so the phone does
+not download a photograph it will never draw. Confirmed in the browser: zero
+requests for it at 375px.
+
+## Three things a napkin does (16 Sep 2026)
+
+The rule for interaction here was the same rule the design had: it has to be
+something the *object* does, not something a web page does. A flip, a button,
+a "read more" would have read as a widget bolted to a picture. Three passed:
+
+**Somebody writes on it.** `servilleta.nota` — "escríbeme" — appears in biro
+in the empty corner under the town, in a different ink and a different hand,
+lying at its own angle. It is revealed with an animated `clip-path` sweeping
+left to right, which is what makes it read as *written* rather than faded in;
+a fade would have looked like a tooltip. A mouse arriving triggers it. A
+finger has no arriving, so on a touch screen the first touch writes and the
+second opens the fold — the `pointerenter` listener is only attached when
+`(hover: hover) and (pointer: fine)` matches, or the synthesised hover on
+touch would do both at once.
+
+**It never falls the same way twice.** Three CSS custom properties — the
+sheet's angle, the print's angle against the sheet, and the print's offset —
+are set at random on every page load. The ranges are tiny (about a degree and
+a percent) and nobody will ever consciously notice. It is the cheapest thing
+on the page and it does more for the illusion than anything else.
+
+**It unfolds — and the fold is at the bottom.** This took three goes, and the
+third is the only one that is actually a napkin.
+
+The first hinged a new sheet on the napkin's bottom edge. The second moved the
+hinge to the line across the middle, on the assumption that the line was the
+crease. Pedro corrected both: *"la bisagra está abajo y lo que hay en medio es
+realmente la parte de abajo doblada hacia arriba."* He is right, and it is the
+whole geometry of the object: **the bottom of the sheet is folded UP over the
+front.** So the fold — the hinge — is the bottom edge of what you see, and the
+line across the middle is not a crease at all. It is the free edge of the
+flap, lying on the sheet, which is also why the bottom of the napkin is two
+layers and a hair wider than the top.
+
+So the component is built as the object is: `.hoja` is the sheet, `.cabeza`
+the printing on the part that never moves, `.interior` the inside of the
+napkin lying under the flap, and `.solapa` the flap itself — hinged on its own
+bottom edge (`transform-origin: bottom center`), carrying the cameras, the
+contact lines, the town and the biro on its outer face, and nothing but
+*Gracias por su visita* on its inner one. Opening rotates it `-180deg`: it
+comes down about the fold, lands face down below the napkin, and the inside
+comes into view where it used to be.
+
+**Why it would not fit, twice.** The first attempt scaled the napkin against
+the window and then called `scrollIntoView`, and it still ran off the bottom.
+Two real causes, both worth remembering:
+
+1. **The element's box is only the folded part.** The flap is absolutely
+   positioned and hangs below it, so `scrollIntoView` centred the folded
+   napkin and left the flap off the screen. What has to be centred is the
+   unfolded height measured from the element's top, which is what `traerla`
+   now does by hand.
+2. **The room was pushing the napkin down with it.** `bottom` on an
+   absolutely positioned child is measured from its container's *padding*
+   box, so growing `.mesa`'s bottom padding moved the napkin down by exactly
+   as much as it added — there was never any new space under the flap, and
+   the page could not scroll far enough to show it. The napkin is now lifted
+   by the same `--servilleta-sobra` it asks for, so it stays exactly where it
+   was lying and the new room appears underneath it, where the flap needs it.
+   The padding is also not animated: the page has to be its full height
+   before anything can be scrolled into view.
+
+**It also has to fit.** Unfolded the napkin is 1.4 times as tall, and on a
+short window the bottom of it ran off the screen — you could not see the whole
+thing at once, which is the entire point of opening it. It now measures itself
+when it opens: if the unfolded height does not fit the window it scales down
+until it does (never below 0.55), anchored at its top edge so it shrinks back
+into the same spot, and it is brought to the middle of the screen. It also
+tells the page how much room it actually needs through `--servilleta-sobra` on
+the root element, which `.mesa` uses for its bottom padding — so the table
+makes exactly the right amount of room rather than a guessed 230px. Resizing
+the window while it is open works it out again.
+
+**The bug worth remembering:** both faces of the flap started out coplanar,
+one at `rotateX(180deg)` and the other at none. A browser cannot order two
+coplanar surfaces, so it drew the face whose back was turned — which, with
+`backface-visibility: hidden`, painted nothing, and the flap was see-through
+whenever it was closed. Half a pixel of `translateZ` on each face fixes it.
+Paper has two sides and they are not in the same place.
+
+Keyboard: the figure is focusable and Enter or Space opens it. Everything
+printed inside the fold is in the page whether it is folded or not, so a
+screen reader gets all of it either way; the keyboard toggle is a nicety, not
+the only way in. The two printed contact lines are still links, and a click
+that lands on one of them is left alone rather than opening the fold.

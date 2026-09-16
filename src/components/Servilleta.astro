@@ -1,0 +1,649 @@
+---
+// ─────────────────────────────────────────────────────────────
+//  LA SERVILLETA
+//
+//  A bar napkin, the kind in the metal dispenser. One ink,
+//  printed cheaply enough that its edges break up, on a plain
+//  white sheet that is taller than it is wide.
+//
+//  HOW IT IS FOLDED, because everything else follows from it:
+//  the bottom of the sheet is folded UP over the front. So the
+//  fold — the hinge — is the bottom edge of what you see, and
+//  the line across the middle is not a crease at all: it is the
+//  free edge of that flap, lying on the sheet. Open it and the
+//  flap swings down about the bottom edge, face down, and the
+//  inside of the napkin comes into view where it used to be.
+//
+//  Everything printed on it lives in src/data/site.ts.
+// ─────────────────────────────────────────────────────────────
+
+import { site, servilleta } from '../data/site';
+
+const handle = `@${site.instagramHandle}`;
+---
+
+<figure class={`servilleta tinta-${servilleta.tinta}`} tabindex="0">
+  <!-- The sheet: the single layer at the top, and — where the flap lies over
+       it — two layers, which is why the lower part is a hair wider. -->
+  <div class="hoja"></div>
+  <div class="grano" aria-hidden="true"></div>
+
+  <!-- The inside of the napkin, under the flap. Nothing shows it until the
+       flap comes down. -->
+  <div class="interior">
+    <div class="impreso dentro">
+      <p class="lema">{servilleta.interior.entradilla}</p>
+
+      <p class="camaras">
+        {
+          servilleta.interior.lineas.map((linea, i) => (
+            <>
+              {i > 0 && <br />}
+              {linea}
+            </>
+          ))
+        }
+      </p>
+
+      <p class="contacto">
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+        <span aria-hidden="true"> - </span>
+        <a href={site.instagram} rel="me noopener" target="_blank">IG {handle}</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- The top of the sheet, which never moves. -->
+  <div class="impreso cabeza">
+    <div class="caja">
+      <p class="rotulo">{site.wordmark}</p>
+
+      <p class="especialidades">
+        {servilleta.entradilla}<br />
+        {
+          servilleta.especialidades.map((linea, i) => (
+            <>
+              {i > 0 && <br />}
+              {linea}
+            </>
+          ))
+        }
+      </p>
+
+      <p class="promesas">
+        {
+          servilleta.promesas.map(([izquierda, derecha]) => (
+            <>
+              <span class="izq">✔ {izquierda}</span>
+              <span class="der">{derecha} ✔</span>
+            </>
+          ))
+        }
+      </p>
+    </div>
+
+    <p class="lema">{servilleta.lema}</p>
+  </div>
+
+  <!-- The flap: the bottom of the sheet, folded up over the front. It is
+       hinged on its own bottom edge, which is the fold. -->
+  <div class="solapa">
+    <div class="cara fuera">
+      <div class="impreso pie">
+        <p class="camaras">
+          {
+            servilleta.camaras.map((linea, i) => (
+              <>
+                {i > 0 && <br />}
+                {linea}
+              </>
+            ))
+          }
+        </p>
+
+        <p class="contacto">
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+          <span aria-hidden="true"> - </span>
+          <a href={site.instagram} rel="me noopener" target="_blank">IG {handle}</a>
+        </p>
+
+        <p class="ciudad">
+          {servilleta.ciudad}
+          <svg viewBox="0 0 200 18" aria-hidden="true">
+            <path
+              d="M6 12c28 4 62 2 96-1 24-2 54-5 92-9"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"></path>
+          </svg>
+        </p>
+      </div>
+
+      <!-- Somebody wrote on it: a different ink, a different hand, and it
+           arrives left to right at the speed of writing. It is written on
+           the flap, so it goes face down with the flap when it is opened. -->
+      <p class="boli" aria-hidden="true">{servilleta.nota}</p>
+    </div>
+
+    <!-- The back of the flap. On a real napkin it is blank, apart from what
+         the bar prints at the very end. -->
+    <div class="cara dentro-solapa">
+      <p class="gracias">{servilleta.interior.cierre}</p>
+    </div>
+  </div>
+</figure>
+
+<!-- The ink is pushed about by turbulence so no edge is laser-straight.
+     A browser that declines the filter just prints it clean. -->
+<svg class="filtro" aria-hidden="true">
+  <filter id="tinta-rota" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="0.68"
+      numOctaves="2"
+      seed="4"
+      result="ruido"></feTurbulence>
+    <feDisplacementMap
+      in="SourceGraphic"
+      in2="ruido"
+      scale="1.3"
+      xChannelSelector="R"
+      yChannelSelector="G"></feDisplacementMap>
+  </filter>
+</svg>
+
+<style>
+  /* The three faces the napkin needs. They are used on this page and
+     nowhere else on the site, so they are not preloaded in the layout —
+     the page is readable in Times and Helvetica while they arrive. */
+  @font-face {
+    font-family: 'Oswald';
+    src: url('/fonts/oswald-var-latin.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Tinos';
+    src: url('/fonts/tinos-700-latin.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Yellowtail';
+    src: url('/fonts/yellowtail-400-latin.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  .filtro {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  /* The flap covers the bottom 40% of the napkin. Everything below is
+     written in terms of that one number. */
+  .servilleta {
+    --solapa: 40%;
+
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 5 / 7;
+    margin: 0;
+    /* Every size on the napkin is a share of its own width, so it is the
+       same printing at any size — never a reflowed one. */
+    container-type: inline-size;
+    color: var(--tinta);
+    /* Set fresh on every visit by the script below: it never lies at the
+       same angle twice. The values here are what it falls back to. */
+    transform: rotate(var(--caida, -0.6deg)) scale(var(--escala, 1));
+    /* It grows downwards out of where it lies, so it shrinks back into the
+       same place: the top edge stays put whatever the scale. */
+    transform-origin: top center;
+    filter: drop-shadow(0 2px 7px rgba(26, 24, 21, 0.08));
+    perspective: 1600px;
+    cursor: pointer;
+
+    --rotulo: 'Oswald', 'Haettenschweiler', 'Arial Narrow', sans-serif;
+    --times: 'Tinos', 'Times New Roman', Times, serif;
+    --firma: 'Yellowtail', 'Brush Script MT', cursive;
+  }
+
+  /* Whatever the printer had in the machine that week. */
+  .tinta-verde {
+    --tinta: #1cab61;
+  }
+
+  .tinta-azul {
+    --tinta: #2f63c2;
+  }
+
+  .tinta-roja {
+    --tinta: #c0392e;
+  }
+
+  /* The sheet itself: one layer, and a hair narrower than the flap lying
+     on top of it, because two folded layers never line up again. */
+  .hoja {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0.4%;
+    right: 0.4%;
+    background: #fff;
+  }
+
+  /* Paper, not screen: the white is mottled, not a flat fill. */
+  .grano {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0.2;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='120' height='120' filter='url(%23g)' opacity='0.28'/></svg>");
+    pointer-events: none;
+  }
+
+  /* Cheap offset never lands square on the sheet. */
+  .impreso {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transform: rotate(var(--registro, 0.4deg)) translateX(var(--corrimiento, -0.5%));
+    filter: url(#tinta-rota);
+  }
+
+  .cabeza {
+    z-index: 3;
+    bottom: var(--solapa);
+    padding: 8cqw 7cqw 0;
+  }
+
+  /* ── the flap ────────────────────────────────────────────────────────
+     The bottom of the sheet, folded up over the front. Its hinge is its
+     own bottom edge — the fold — so opening it swings it down and out,
+     face down, and it comes to rest below the napkin. */
+  .solapa {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - var(--solapa));
+    height: var(--solapa);
+    z-index: 4;
+    transform-origin: bottom center;
+    transform-style: preserve-3d;
+    transform: rotateX(0deg);
+    transition: transform 800ms cubic-bezier(0.3, 0.75, 0.3, 1);
+  }
+
+  .servilleta.viva {
+    transition: transform 800ms cubic-bezier(0.3, 0.75, 0.3, 1);
+  }
+
+  .servilleta.abierta .solapa {
+    transform: rotateX(-180deg);
+  }
+
+  /* Paper has two sides and they are not in the same place. Without the
+     half-pixel between them the two faces are coplanar, the browser cannot
+     tell which is in front, and the one whose back is turned wins — the
+     flap goes see-through. */
+  .cara {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0.5px);
+  }
+
+  /* The free edge of the flap, lying on the sheet: the line across the
+     middle. A shadow above it, the paper below. */
+  .fuera {
+    box-shadow: 0 -1.5px 3px rgba(26, 24, 21, 0.05);
+  }
+
+  .dentro-solapa {
+    transform: rotateX(180deg) translateZ(0.5px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 9cqw;
+  }
+
+  .pie {
+    padding: 4cqw 7cqw 6cqw;
+    justify-content: flex-start;
+  }
+
+  /* ── the inside of the napkin, under the flap ───────────────────── */
+  .interior {
+    position: absolute;
+    left: 0.4%;
+    right: 0.4%;
+    top: calc(100% - var(--solapa));
+    bottom: 0;
+    z-index: 1;
+    background: #fff;
+  }
+
+  .dentro {
+    padding: 5cqw 7cqw 4cqw;
+    justify-content: flex-start;
+  }
+
+  .dentro .lema {
+    margin-top: 0;
+  }
+
+  .dentro .camaras {
+    margin-top: 2.4cqw;
+  }
+
+  /* ── the printing ───────────────────────────────────────────────── */
+
+  /* One thick rule with a hairline just inside it. */
+  .caja {
+    width: 100%;
+    border: 0.95cqw solid currentColor;
+    box-shadow:
+      inset 0 0 0 0.75cqw #fff,
+      inset 0 0 0 1.05cqw currentColor;
+    padding: 3.4cqw 3cqw 3cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2cqw;
+  }
+
+  .rotulo {
+    font-family: var(--rotulo);
+    font-weight: 700;
+    font-size: 15cqw;
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .especialidades {
+    font-family: var(--rotulo);
+    font-weight: 500;
+    font-size: 4.3cqw;
+    line-height: 1.22;
+    text-transform: uppercase;
+  }
+
+  /* The ticks, each pair facing its own margin. */
+  .promesas {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2cqw;
+    row-gap: 0.6cqw;
+    margin-top: 1cqw;
+    font-family: var(--times);
+    font-weight: 700;
+    font-size: 4.4cqw;
+    line-height: 1.3;
+  }
+
+  .promesas span {
+    white-space: nowrap;
+  }
+
+  .promesas .izq {
+    text-align: left;
+  }
+
+  .promesas .der {
+    text-align: right;
+  }
+
+  /* Outside the box, tight under it. */
+  .lema {
+    margin-top: 2.4cqw;
+    font-family: var(--rotulo);
+    font-weight: 700;
+    font-size: 4.2cqw;
+    line-height: 1.3;
+  }
+
+  .camaras {
+    font-family: var(--rotulo);
+    font-weight: 500;
+    font-size: 3.9cqw;
+    line-height: 1.5;
+  }
+
+  .contacto {
+    margin-top: 1.6cqw;
+    font-family: var(--rotulo);
+    font-weight: 700;
+    font-size: 4.7cqw;
+    line-height: 1.5;
+  }
+
+  /* The two printed lines are the real links. Nothing marks them until
+     the pointer is on them — a napkin has no underlines. */
+  .contacto a {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color 150ms ease;
+  }
+
+  .contacto a:hover,
+  .contacto a:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  .ciudad {
+    margin-top: 1.4cqw;
+    font-family: var(--firma);
+    font-size: 9.5cqw;
+    line-height: 1.1;
+  }
+
+  /* The rule the printer put under the town, by hand, once. */
+  .ciudad svg {
+    display: block;
+    width: 58%;
+    height: auto;
+    margin: -2cqw auto 0;
+  }
+
+  .gracias {
+    font-family: var(--firma);
+    font-size: 8cqw;
+    line-height: 1.1;
+    color: var(--tinta);
+    transform: rotate(var(--registro, 0.4deg));
+    filter: url(#tinta-rota);
+  }
+
+  /* ── someone wrote on it ─────────────────────────────────────────
+     A biro, not the printer's ink: darker blue, a different hand, and
+     lying at its own angle. It is revealed left to right, which is what
+     makes it read as written rather than as faded in. */
+  .boli {
+    position: absolute;
+    z-index: 5;
+    right: 4cqw;
+    bottom: 7cqw;
+    font-family: var(--firma);
+    font-size: 9cqw;
+    line-height: 1;
+    color: #26348c;
+    transform: rotate(-6deg);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1100ms cubic-bezier(0.35, 0.1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .servilleta.escrita .boli {
+    clip-path: inset(0 -6% 0 0);
+  }
+
+  /* Nothing on the napkin animates for anyone who has asked for less of
+     it: the writing is simply there, and the flap simply comes down. */
+  @media (prefers-reduced-motion: reduce) {
+    .boli,
+    .solapa,
+    .servilleta.viva {
+      transition-duration: 1ms;
+    }
+  }
+</style>
+
+<script>
+  // ───────────────────────────────────────────────────────────────
+  //  Three things a napkin does, and nothing a web page does.
+  //
+  //  1. Somebody writes on it — when the pointer arrives, or, on a
+  //     phone, at the first touch. Once written, it stays written.
+  //  2. It never lies the same way twice: the sheet falls at its own
+  //     angle on every visit, and the printing lands on it a hair
+  //     differently, the way cheap offset does.
+  //  3. It can be unfolded: the flap comes down about the fold at the
+  //     bottom, and the inside of the napkin is underneath.
+  // ───────────────────────────────────────────────────────────────
+
+  function alAzar(min: number, max: number) {
+    return min + Math.random() * (max - min);
+  }
+
+  /** How much taller the napkin is unfolded than folded. */
+  const DESPLEGADA = 1.4;
+
+  /** What the browser is actually showing — on a phone the toolbars take a
+      good part of `innerHeight`, and `visualViewport` is the honest number. */
+  function altoVisible() {
+    return window.visualViewport?.height ?? window.innerHeight;
+  }
+
+  /**
+   * Unfolded, the napkin is 1.4 times as tall as it is folded. If that does
+   * not fit on the screen it is scaled down until it does, so the whole of it
+   * can be seen at once — and the page is told how much room the open one
+   * actually needs, in `--servilleta-sobra`.
+   */
+  function encajar(servilleta: HTMLElement, abierta: boolean) {
+    const raiz = document.documentElement;
+
+    if (!abierta) {
+      servilleta.style.setProperty('--escala', '1');
+      raiz.style.setProperty('--servilleta-sobra', '0px');
+      return 0;
+    }
+
+    const plegada = servilleta.offsetHeight;
+    const desplegada = plegada * DESPLEGADA;
+    const hueco = altoVisible() - 48;
+    const escala = Math.max(0.4, Math.min(1, hueco / desplegada));
+    const alto = desplegada * escala;
+
+    servilleta.style.setProperty('--escala', escala.toFixed(3));
+    // A little air under it, so the open napkin is not glued to the very
+    // bottom of the page — and so there is room to scroll it fully clear.
+    raiz.style.setProperty(
+      '--servilleta-sobra',
+      `${Math.max(0, Math.round(alto - plegada)) + 32}px`,
+    );
+
+    return alto;
+  }
+
+  /**
+   * Put the whole of the open napkin on the screen. The element's own box is
+   * only the folded part — the flap hangs below it and is not in the box at
+   * all — so centring the element leaves the flap off the bottom. What has to
+   * be centred is the unfolded height, measured from the element's top.
+   */
+  function traerla(servilleta: HTMLElement, alto: number) {
+    const arriba = servilleta.getBoundingClientRect().top;
+    const centro = arriba + alto / 2;
+    const salto = centro - altoVisible() / 2;
+
+    if (Math.abs(salto) < 2) return;
+
+    window.scrollBy({
+      top: salto,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+    });
+  }
+
+  function preparar() {
+    const servilleta = document.querySelector<HTMLElement>('.servilleta');
+    if (!servilleta || servilleta.dataset.lista === 'true') return;
+    servilleta.dataset.lista = 'true';
+
+    // 2 — how it fell this time.
+    servilleta.style.setProperty('--caida', `${alAzar(-1.6, 0.9).toFixed(2)}deg`);
+    servilleta.style.setProperty('--registro', `${alAzar(-0.5, 0.9).toFixed(2)}deg`);
+    servilleta.style.setProperty('--corrimiento', `${alAzar(-1.4, 0.6).toFixed(2)}%`);
+    requestAnimationFrame(() => servilleta.classList.add('viva'));
+
+    // 1 — the biro. A mouse arriving is enough; a finger has no arriving,
+    // so on a touch screen it is the first touch that writes (below).
+    const escribir = () => servilleta.classList.add('escrita');
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      servilleta.addEventListener('pointerenter', escribir, { once: true });
+    }
+
+    // 3 — unfolding it. A napkin has no button: you touch the napkin.
+    // The printed email and Instagram are still links, so a click that
+    // lands on one of those is left alone.
+    const abrir = (evento: Event) => {
+      if ((evento.target as HTMLElement).closest('a')) return;
+
+      if (!servilleta.classList.contains('escrita')) {
+        escribir();
+        return;
+      }
+
+      const abierta = servilleta.classList.toggle('abierta');
+      const alto = encajar(servilleta, abierta);
+
+      // Then bring the whole of it in front of you, the way you would pull
+      // something you have just opened towards you. It waits for the table
+      // to finish making room, or it would aim at the old position.
+      if (abierta) setTimeout(() => traerla(servilleta, alto), 420);
+    };
+
+    // Whenever the screen changes shape while it is open — a window dragged
+    // smaller, a phone turned, a toolbar sliding away — work it out again.
+    const otraVez = () => {
+      const abierta = servilleta.classList.contains('abierta');
+      const alto = encajar(servilleta, abierta);
+      if (abierta) traerla(servilleta, alto);
+    };
+
+    window.addEventListener('resize', otraVez);
+    window.visualViewport?.addEventListener('resize', otraVez);
+
+    servilleta.addEventListener('click', abrir);
+    servilleta.addEventListener('keydown', (evento) => {
+      if (evento.key !== 'Enter' && evento.key !== ' ') return;
+      evento.preventDefault();
+      abrir(evento);
+    });
+  }
+
+  preparar();
+  // The site swaps pages without reloading, so the napkin has to be set up
+  // again each time this page arrives.
+  document.addEventListener('astro:page-load', preparar);
+</script>

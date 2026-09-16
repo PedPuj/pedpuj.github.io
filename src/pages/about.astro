@@ -2,51 +2,48 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import Servilleta from '../components/Servilleta.astro';
 import { aboutImage } from '../data/catalog';
-import { site, aboutText, aboutPhotoSlot } from '../data/site';
+import { aboutText, aboutPhotoSlot } from '../data/site';
 ---
 
 <Base title="About" ground="#F5F2EC">
   <SiteHeader />
 
   <main id="main" class="about">
-    <div class="portrait" lang="es">
-      {
-        aboutImage ? (
-          <Image
-            src={aboutImage}
-            alt={aboutPhotoSlot}
-            widths={[500, 900]}
-            sizes="(max-width: 768px) 100vw, 30vw"
-            loading="eager"
-            data-fade
-          />
-        ) : (
-          <span class="slot">
-            {import.meta.env.DEV && <span class="mono slot-note">{aboutPhotoSlot}</span>}
-          </span>
-        )
-      }
-    </div>
-
     <div class="text" lang="es">
       {aboutText.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
 
-      <div class="mono contact">
-        {site.cameras.map((camera) => <span>{camera}</span>)}
-        <span>{site.films}</span>
-        <span>{site.email.toUpperCase()}</span>
+    <div class="mesa">
+      <div class="portrait" lang="es">
+        {
+          aboutImage ? (
+            <Image
+              src={aboutImage}
+              alt={aboutPhotoSlot}
+              widths={[500, 900]}
+              sizes="40vw"
+              loading="lazy"
+              data-fade
+            />
+          ) : (
+            <span class="slot">
+              {import.meta.env.DEV && <span class="mono slot-note">{aboutPhotoSlot}</span>}
+            </span>
+          )
+        }
       </div>
 
-      <p class="links">
-        <a href={site.instagram} rel="me noopener" target="_blank">Instagram</a>
-        <a href={`mailto:${site.email}`}>Email</a>
-      </p>
+      <Servilleta />
     </div>
   </main>
 </Base>
 
 <style>
+  /* Both things are lying on the same table: the napkin has been put down on
+     the photograph, over its bottom-right corner, and the words sit to the
+     right of the pair. */
   .about {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -54,8 +51,31 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
     padding: 88px var(--margin) 120px;
   }
 
+  .mesa {
+    grid-column: 1 / span 7;
+    grid-row: 1;
+    position: relative;
+    /* The napkin hangs below the photograph by this much; the table is as
+       tall as the pair, so nothing spills onto what comes after. */
+    padding-bottom: 40px;
+  }
+
+  .text {
+    grid-column: 9 / span 4;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .text p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
   .portrait {
-    grid-column: span 4;
+    width: 62%;
     height: 520px;
     background: var(--block);
     overflow: hidden;
@@ -74,6 +94,38 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
     opacity: 1;
   }
 
+  /* Opened, the napkin is twice as tall, so the table makes room for it
+     rather than letting it run off the bottom of the page. */
+  /* The napkin carries the component's own scope, not this page's, so the
+     whole selector is global or it never matches. */
+  :global(.mesa:has(.servilleta.abierta)) {
+    /* The napkin measures itself when it opens and says here how much room
+       it actually needs; the fallback is what it needs at full size. */
+    padding-bottom: var(--servilleta-sobra, 230px);
+  }
+
+  /* The room for the open napkin appears at once, and deliberately is not
+     animated: the page has to be its full height before the napkin can be
+     scrolled into view, or the scroll is cut short against a page that is
+     still growing. */
+
+  /* Put down last, so it lies on top.
+
+     `bottom` is measured from the bottom of the table's padding box, so the
+     room the open napkin asks for would otherwise push the napkin down with
+     it and there would never be any room at all. Lifting it by the same
+     amount leaves it exactly where it was lying and puts the new space
+     underneath, where the flap needs it. */
+  .mesa :global(.servilleta) {
+    position: absolute;
+    right: 0;
+    bottom: var(--servilleta-sobra, 0px);
+    /* Small enough that the unfolded napkin — half as tall again — still
+       fits a laptop screen without having to be shrunk to fit. */
+    width: 46%;
+    max-width: 320px;
+  }
+
   .slot {
     display: flex;
     align-items: flex-end;
@@ -87,54 +139,10 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
     font-size: 10px;
   }
 
-  .text {
-    grid-column: 6 / span 5;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    max-width: 60ch;
-  }
-
-  .text p {
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--ink);
-  }
-
-  .contact {
-    display: flex;
-    flex-direction: column;
-    padding-top: 8px;
-    border-top: 1px solid var(--hairline);
-    color: var(--ink-2);
-    line-height: 2;
-  }
-
-  /* A line too long for a narrow column wraps with a hanging indent,
-     so the Fuji's third lens doesn't read as a camera of its own. */
-  .contact span {
-    padding-left: 2ch;
-    text-indent: -2ch;
-  }
-
-  .links {
-    display: flex;
-    gap: 24px;
-    font-size: 16px;
-  }
-
-  .links a {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    text-decoration-thickness: 1px;
-    text-decoration-color: var(--hairline);
-    transition: text-decoration-color 150ms ease;
-  }
-
-  .links a:hover {
-    text-decoration-color: var(--ink);
-  }
-
+  /* On a phone the photograph is gone — the words and the napkin are the
+     whole page, and the napkin has the table to itself. The image is lazy
+     rather than eager precisely so a phone, which never shows it, never
+     downloads it either. */
   @media (max-width: 768px) {
     .about {
       display: block;
@@ -142,12 +150,18 @@ import { site, aboutText, aboutPhotoSlot } from '../data/site';
     }
 
     .portrait {
-      height: 420px;
-      margin-bottom: 32px;
+      display: none;
     }
 
-    .text {
-      max-width: none;
+    .mesa {
+      margin-top: 48px;
+      padding-bottom: 0;
+    }
+
+    .mesa :global(.servilleta) {
+      position: static;
+      width: 100%;
+      max-width: 300px;
     }
   }
 </style>
