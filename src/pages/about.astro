@@ -158,10 +158,13 @@ import { aboutText, aboutPhotoSlot } from '../data/site';
       padding-bottom: 0;
     }
 
+    /* On a phone it is as wide as the text above it and no narrower: capped
+       to anything less, it ends short of the right margin while the words
+       still reach it, and the whole napkin reads as shoved to the left. */
     .mesa :global(.servilleta) {
       position: static;
       width: 100%;
-      max-width: 300px;
+      max-width: none;
     }
   }
 </style>

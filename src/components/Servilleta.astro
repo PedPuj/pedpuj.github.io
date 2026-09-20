@@ -204,9 +204,11 @@ const handle = `@${site.instagramHandle}`;
     /* Set fresh on every visit by the script below: it never lies at the
        same angle twice. The values here are what it falls back to. */
     transform: rotate(var(--caida, -0.6deg)) scale(var(--escala, 1));
-    /* It grows downwards out of where it lies, so it shrinks back into the
-       same place: the top edge stays put whatever the scale. */
-    transform-origin: top center;
+    /* It turns on its own middle. Turned on its top edge instead, the whole
+       bottom of the sheet swings one way and the napkin reads as shoved to
+       that side — which is exactly what it looked like on a phone, where it
+       is as wide as the text and has no margin to swing into. */
+    transform-origin: center center;
     filter: drop-shadow(0 2px 7px rgba(26, 24, 21, 0.08));
     perspective: 1600px;
     cursor: pointer;
